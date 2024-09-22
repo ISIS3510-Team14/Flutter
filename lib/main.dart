@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'views/splash_screen.dart';
-import 'routes/app_routes.dart';
-import 'constants/app_constants.dart';
+import 'routes/app_routes.dart';  // Import your AppRoutes
+import 'constants/app_constants.dart';  // Any constants you might be using
 
 void main() {
-  runApp(SustainUApp());
+  runApp(MyApp());
 }
 
-class SustainUApp extends StatelessWidget {
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -17,8 +16,8 @@ class SustainUApp extends StatelessWidget {
         primarySwatch: Colors.green,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      initialRoute: '/',
-      routes: AppRoutes.routes,
+      initialRoute: '/',  // Initial route set to splash screen
+      routes: AppRoutes.routes,  // Use the routes from AppRoutes class
     );
   }
 }

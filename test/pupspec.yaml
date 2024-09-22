@@ -1,0 +1,42 @@
+name: sustainu_app
+description: An app for promoting sustainability on campus with recycling features.
+
+publish_to: 'none' # If you don't plan to publish this package.
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.17.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Dependencia común para íconos de iOS.
+  cupertino_icons: ^1.0.2
+
+  # Asegúrate de que estas dependencias están correctas según tus necesidades.
+  # Sustituye o agrega más dependencias según sea necesario.
+  provider: ^6.0.3   # Para manejar el estado.
+  http: ^0.13.3      # Si estás usando API o webhooks.
+  flutter_svg: ^1.0.3  # Si estás usando imágenes SVG.
+  # Añade cualquier otro paquete que necesites, como firebase si lo usas.
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+
+  # Define los assets (imágenes) que usarás en tu aplicación
+  assets:
+    - assets/img.png
+    - assets/logo.png  # Cambia esto por el nombre real de tu imagen
+    # Si tienes más imágenes, añádelas aquí.
+
+  # Si usas fuentes personalizadas
+  fonts:
+    - family: SustainUFont
+      fonts:
+        - asset: assets/fonts/SustainU-Regular.ttf  # Ejemplo de fuente personalizada

@@ -1,34 +1,38 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
-import '../utils/sustanu_colors.dart';
-import 'login_screen.dart';
-import '../constants/app_constants.dart';
 
-class SplashScreen extends StatefulWidget {
-  @override
-  _SplashScreenState createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends State<SplashScreen> {
-  @override
-  void initState() {
-    super.initState();
-    Timer(AppConstants.splashDelay, () {
-      Navigator.of(context).pushReplacementNamed('/login');
-    });
-  }
-
+class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: SustainUColors.background,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset('assets/logo.png', height: 120), // Replace with your logo path
+            // Cargar la imagen principal
+            Image.asset('assets/img.png'),  // Asegúrate de que esta ruta coincida con la estructura de tu proyecto
             SizedBox(height: 20),
-            Text(AppConstants.appName, style: TextStyle(fontSize: 32, color: SustainUColors.limeGreen)),
+            // Cargar el logo
+            Image.asset('assets/logo.png'), // Asegúrate de que esta ruta coincida con la estructura de tu proyecto
+            SizedBox(height: 20),
+            Text(
+              'SustainU',
+              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 30),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/sign_in');
+              },
+              child: Text('Sign In'),
+              style: ElevatedButton.styleFrom(backgroundColor: Color(0xFFB1CC33)),
+            ),
+            SizedBox(height: 10),
+            TextButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/sign_up');
+              },
+              child: Text('Sign Up', style: TextStyle(color: Color(0xFFB1CC33))),
+            ),
           ],
         ),
       ),
