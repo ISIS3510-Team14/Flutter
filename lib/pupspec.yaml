@@ -29,11 +29,8 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  # Define los assets (imágenes) que usarás en tu aplicación
   assets:
-    - assets/img.png
-    - assets/logo.png  # Cambia esto por el nombre real de tu imagen
-    # Si tienes más imágenes, añádelas aquí.
+    - lib/assets/
 
   # Si usas fuentes personalizadas
   fonts:

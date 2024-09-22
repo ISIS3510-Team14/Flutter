@@ -63,7 +63,7 @@ class SignUpScreen extends StatelessWidget {
             SizedBox(height: 30),
             // Sign Up Button
             CustomButton(
-              text: 'Sign Up',
+              text: 'Sign Up', 
               color: SustainUColors.limeGreen,
               onPressed: () {
                 // Handle sign-up logic
