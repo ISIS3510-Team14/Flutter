@@ -10,5 +10,6 @@ class AppRoutes {
     '/login': (context) => LoginScreen(),
     '/sign_in': (context) => SignInScreen(),
     '/sign_up': (context) => SignUpScreen(),
+
   };
 }
