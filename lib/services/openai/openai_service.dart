@@ -4,7 +4,7 @@ import 'dart:convert';
 import '../../models/chat_request.dart';
 
 class ChatService {
-  static final Uri chatUri = Uri.parse('https://sinfonia.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2024-02-01&api-key=${ApiKey.openAIApiKey}');
+  static final Uri chatUri = Uri.parse('https://${ApiKey.openAIApiEndpoint}/openai/deployments/gpt-4o/chat/completions?api-version=2024-02-01&api-key=${ApiKey.openAIApiKey}');
   Map<String, String> headers = {
   'Content-Type': 'application/json',
   };
