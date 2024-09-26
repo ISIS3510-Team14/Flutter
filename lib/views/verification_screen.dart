@@ -2,7 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import '../utils/sustanu_colors.dart';
 
-class ForgotPasswordScreen extends StatelessWidget {
+class VerificationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,7 +23,7 @@ class ForgotPasswordScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Forgot your password?',
+              'Verification',
               style: TextStyle(
                 fontFamily: 'Montserrat',
                 fontSize: 24,
@@ -33,52 +33,30 @@ class ForgotPasswordScreen extends StatelessWidget {
             ),
             SizedBox(height: 8),
             Text(
-              'Please enter the email associated with your account',
+              'Click below on the 4-digit code we sent to your email',
               style: TextStyle(
-                fontFamily: 'Montserrat',
                 color: SustainUColors.textLight,
+                fontFamily: 'Montserrat',
               ),
             ),
             SizedBox(height: 20),
-            TextField(
-              decoration: InputDecoration(
-                labelText: 'Email',
-                labelStyle: TextStyle(
-                  fontFamily: 'Montserrat',
-                  color: SustainUColors.textLight,
-                ),
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20), 
-                  borderSide: BorderSide(
-                    color: Colors.grey, 
-                  ),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: BorderSide(
-                    color: Colors.grey, 
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: BorderSide(
-                    color: SustainUColors.limeGreen, 
-                    width: 2.0,
-                  ),
-                ),
-              ),
-              keyboardType: TextInputType.emailAddress, 
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildCodeField(context),
+                _buildCodeField(context),
+                _buildCodeField(context),
+                _buildCodeField(context),
+              ],
             ),
             SizedBox(height: 20),
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.pushNamed(context, '/verification');
+                  Navigator.pushNamed(context, '/new_password');
                 },
                 child: Text(
-                  'Send code',
+                  'Verify',
                   style: TextStyle(
                     fontFamily: 'Montserrat',
                     color: Colors.white,
@@ -88,17 +66,18 @@ class ForgotPasswordScreen extends StatelessWidget {
                   backgroundColor: SustainUColors.limeGreen,
                   minimumSize: Size(200, 50),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20), 
+                    borderRadius: BorderRadius.circular(20),
                   ),
                 ),
               ),
             ),
             Spacer(),
+
             Center(
               child: RichText(
                 textAlign: TextAlign.center,
                 text: TextSpan(
-                  text: 'Know your password?\n',
+                  text: 'Did not receive the code?\n',
                   style: TextStyle(
                     fontFamily: 'Montserrat',
                     color: SustainUColors.text,
@@ -106,22 +85,58 @@ class ForgotPasswordScreen extends StatelessWidget {
                   ),
                   children: [
                     TextSpan(
-                      text: 'Sign in',
+                      text: 'resend',
                       style: TextStyle(
                         fontFamily: 'Montserrat',
                         color: SustainUColors.limeGreen,
                         fontWeight: FontWeight.bold,
                       ),
-                      recognizer: TapGestureRecognizer()
-                        ..onTap = () {
-                          Navigator.pushNamed(context, '/sign_in');
-                        },
+                      
                     ),
                   ],
                 ),
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCodeField(BuildContext context) {
+    return Container(
+      width: 50,
+      height: 50,
+      margin: EdgeInsets.symmetric(horizontal: 8),
+      child: TextField(
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontFamily: 'Montserrat',
+          fontSize: 24,
+        ),
+        keyboardType: TextInputType.number,
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10), 
+            borderSide: BorderSide(
+              color: Colors.grey, 
+            ),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(
+              color: Colors.grey, 
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(
+              color: SustainUColors.limeGreen, 
+              width: 2.0,
+            ),
+          ),
         ),
       ),
     );

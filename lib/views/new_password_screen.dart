@@ -1,8 +1,7 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import '../utils/sustanu_colors.dart';
 
-class ForgotPasswordScreen extends StatelessWidget {
+class NewPasswordScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,7 +22,7 @@ class ForgotPasswordScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Forgot your password?',
+              'Done! Create a new password',
               style: TextStyle(
                 fontFamily: 'Montserrat',
                 fontSize: 24,
@@ -31,18 +30,44 @@ class ForgotPasswordScreen extends StatelessWidget {
                 color: SustainUColors.text,
               ),
             ),
-            SizedBox(height: 8),
-            Text(
-              'Please enter the email associated with your account',
-              style: TextStyle(
-                fontFamily: 'Montserrat',
-                color: SustainUColors.textLight,
-              ),
-            ),
             SizedBox(height: 20),
+            // New Password Field
             TextField(
               decoration: InputDecoration(
-                labelText: 'Email',
+                labelText: 'Enter a new password',
+                labelStyle: TextStyle(
+                  fontFamily: 'Montserrat',
+                  color: SustainUColors.textLight,
+                ),
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20), 
+                  borderSide: BorderSide(
+                    color: Colors.grey, 
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide(
+                    color: Colors.grey, 
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide(
+                    color: SustainUColors.limeGreen,
+                    width: 2.0,
+                  ),
+                ),
+              ),
+              obscureText: true,
+            ),
+            SizedBox(height: 20),
+            // Confirm Password Field
+            TextField(
+              decoration: InputDecoration(
+                labelText: 'Confirm new password',
                 labelStyle: TextStyle(
                   fontFamily: 'Montserrat',
                   color: SustainUColors.textLight,
@@ -69,16 +94,16 @@ class ForgotPasswordScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              keyboardType: TextInputType.emailAddress, 
+              obscureText: true,
             ),
             SizedBox(height: 20),
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.pushNamed(context, '/verification');
+                  Navigator.pushNamed(context, '/confirmation');
                 },
                 child: Text(
-                  'Send code',
+                  'Confirm',
                   style: TextStyle(
                     fontFamily: 'Montserrat',
                     color: Colors.white,
@@ -90,34 +115,6 @@ class ForgotPasswordScreen extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20), 
                   ),
-                ),
-              ),
-            ),
-            Spacer(),
-            Center(
-              child: RichText(
-                textAlign: TextAlign.center,
-                text: TextSpan(
-                  text: 'Know your password?\n',
-                  style: TextStyle(
-                    fontFamily: 'Montserrat',
-                    color: SustainUColors.text,
-                    fontSize: 16,
-                  ),
-                  children: [
-                    TextSpan(
-                      text: 'Sign in',
-                      style: TextStyle(
-                        fontFamily: 'Montserrat',
-                        color: SustainUColors.limeGreen,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      recognizer: TapGestureRecognizer()
-                        ..onTap = () {
-                          Navigator.pushNamed(context, '/sign_in');
-                        },
-                    ),
-                  ],
                 ),
               ),
             ),
