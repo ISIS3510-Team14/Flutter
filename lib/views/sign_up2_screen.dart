@@ -2,14 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import '../utils/sustanu_colors.dart';
 
-class SignInScreen extends StatefulWidget {
-  @override
-  _SignInScreenState createState() => _SignInScreenState();
-}
-
-class _SignInScreenState extends State<SignInScreen> {
-  bool _obscurePassword = true;
-
+class SignUp2Screen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,9 +24,9 @@ class _SignInScreenState extends State<SignInScreen> {
               ),
             ),
             SizedBox(height: 20),
-            // Welcome Text aligned to the left
+            // Welcome Text
             Text(
-              'Welcome back!',
+              'Welcome!',
               style: TextStyle(
                 fontFamily: 'Montserrat',
                 fontSize: 32,
@@ -42,108 +35,104 @@ class _SignInScreenState extends State<SignInScreen> {
               ),
             ),
             SizedBox(height: 30),
-            // Username Field
+            // Phone Number Field (only accepts numbers)
             TextFormField(
               decoration: InputDecoration(
-                labelText: 'Username',
-                labelStyle: TextStyle(
-                  fontFamily: 'Montserrat',
-                  color: SustainUColors.textLight,
-                ),
+                labelText: 'Phone number',
+                labelStyle: TextStyle(color: SustainUColors.textLight),
                 filled: true,
-                fillColor: Colors.white, 
+                fillColor: Colors.white,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20), 
+                  borderRadius: BorderRadius.circular(20),
                   borderSide: BorderSide(
-                    color: Colors.grey, 
+                    color: Colors.grey,
                   ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
                   borderSide: BorderSide(
-                    color: Colors.grey, 
+                    color: Colors.grey,
                   ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
                   borderSide: BorderSide(
-                    color: SustainUColors.limeGreen, 
+                    color: SustainUColors.limeGreen,
                     width: 2.0,
                   ),
                 ),
               ),
+              keyboardType: TextInputType.phone, 
             ),
             SizedBox(height: 20),
-            
-            // Password
+            // Zip Code Field (only accepts numbers)
             TextFormField(
-              obscureText: _obscurePassword,
               decoration: InputDecoration(
-                labelText: 'Password',
-                labelStyle: TextStyle(
-                  fontFamily: 'Montserrat',
-                  color: SustainUColors.textLight,
-                ),
+                labelText: 'Zip code',
+                labelStyle: TextStyle(color: SustainUColors.textLight),
                 filled: true,
-                fillColor: Colors.white,  
+                fillColor: Colors.white,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20), 
+                  borderRadius: BorderRadius.circular(20),
                   borderSide: BorderSide(
-                    color: Colors.grey, 
+                    color: Colors.grey,
                   ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
                   borderSide: BorderSide(
-                    color: Colors.grey, 
+                    color: Colors.grey,
                   ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
                   borderSide: BorderSide(
-                    color: SustainUColors.limeGreen, 
+                    color: SustainUColors.limeGreen,
                     width: 2.0,
                   ),
                 ),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                    color: SustainUColors.limeGreen,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _obscurePassword = !_obscurePassword;
-                    });
-                  },
-                ),
               ),
+              keyboardType: TextInputType.number, 
             ),
-            SizedBox(height: 10),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/forgot_password');
-                },
-                child: Text(
-                  'Forgot your password?',
-                  style: TextStyle(
-                    fontFamily: 'Montserrat',
-                    color: SustainUColors.text,
-                    fontWeight: FontWeight.w500,
+            SizedBox(height: 20),
+            // Number Field (only accepts numbers)
+            TextFormField(
+              decoration: InputDecoration(
+                labelText: 'Number',
+                labelStyle: TextStyle(color: SustainUColors.textLight),
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide(
+                    color: Colors.grey,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide(
+                    color: Colors.grey,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide(
+                    color: SustainUColors.limeGreen,
+                    width: 2.0,
                   ),
                 ),
               ),
+              keyboardType: TextInputType.number, 
             ),
             SizedBox(height: 30),
-            // Sign In Button
+            // Sign Up Button
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.pushNamed(context, '/home');
+                  Navigator.pushNamed(context, '/sign_in');
                 },
                 child: Text(
-                  'Sign In',
+                  'Sign up',
                   style: TextStyle(
                     fontFamily: 'Montserrat',
                     color: Colors.white,
@@ -159,12 +148,12 @@ class _SignInScreenState extends State<SignInScreen> {
               ),
             ),
             SizedBox(height: 20),
-            // "Don't have an account? Sign up" Text Button
+            // "Already have an account? Sign in" Text Button
             Center(
               child: RichText(
                 textAlign: TextAlign.center,
                 text: TextSpan(
-                  text: 'Don’t have an account?\n ',
+                  text: 'Already have an account?\n',
                   style: TextStyle(
                     fontFamily: 'Montserrat',
                     color: SustainUColors.text,
@@ -172,7 +161,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   ),
                   children: [
                     TextSpan(
-                      text: 'Sign up',
+                      text: 'Sign in',
                       style: TextStyle(
                         fontFamily: 'Montserrat',
                         color: SustainUColors.limeGreen,
@@ -180,7 +169,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       ),
                       recognizer: TapGestureRecognizer()
                         ..onTap = () {
-                          Navigator.pushNamed(context, '/sign_up');
+                          Navigator.pushNamed(context, '/sign_in');
                         },
                     ),
                   ],

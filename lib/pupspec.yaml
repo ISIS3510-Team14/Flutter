@@ -34,6 +34,8 @@ flutter:
 
   # Si usas fuentes personalizadas
   fonts:
-    - family: SustainUFont
+    - family: Montserrat
       fonts:
-        - asset: assets/fonts/SustainU-Regular.ttf  # Ejemplo de fuente personalizada
+        - asset: fonts/Montserrat-Regular.ttf
+        - asset: fonts/Montserrat-Bold.ttf
+          weight: 700
