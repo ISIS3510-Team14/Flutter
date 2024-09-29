@@ -12,30 +12,109 @@ class GoogleMaps extends StatefulWidget {
 class _GoogleMapsState extends State<GoogleMaps> {
   final locationController = Location();
   LatLng myLoc = const LatLng(4.60140465, -74.0649032880709);
-  static const ml = LatLng(4.602796139679612, -74.06469731690541);
   LatLng? currentPosition;
+  List<LatLng> positions = [];
+  Set<Marker> markers = {};
+  BitmapDescriptor customIcon = BitmapDescriptor.defaultMarker;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance
-        .addPostFrameCallback((_) async => await fetchLocationUpdates());
+    initData();
+    customMarker();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await fetchLocationUpdates();
+      setMarkers();
+    });
+  }
+
+  Future<void> initData() async {
+    positions.addAll(
+      [
+        const LatLng(4.602796139679612, -74.06469731690541),
+        const LatLng(4.602124935457818, -74.06501910977771),
+        const LatLng(4.601199293613709, -74.06537508662423),
+        const LatLng(4.602362693133353, -74.06544969672042),
+        const LatLng(4.604240151032256, -74.0659585186188)
+      ],
+    );
+  }
+
+  Future<void> customMarker() async {
+    BitmapDescriptor.asset(
+      const ImageConfiguration(),
+      "assets/ic_pick.png",
+      width: 40,
+      height: 40,
+    ).then((icon) {
+      setState(() {
+        customIcon = icon;
+        setMarkers();
+      });
+    });
+  }
+
+  void setMarkers() {
+    markers.clear();
+    for (var position in positions) {
+      markers.add(Marker(
+        markerId: MarkerId(position.toString()),
+        position: position,
+        icon: customIcon,
+      ));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: GoogleMap(
-          initialCameraPosition: CameraPosition(target: myLoc, zoom: 17),
-          markers: {
-            const Marker(
-              markerId: MarkerId('destinationLocation'),
-              icon: BitmapDescriptor.defaultMarker,
-              position: ml,
-            )
-          }),
+      body: Column(
+        children: [
+          // Google Map Section
+          Expanded(
+            flex: 2, // Set this to control the map height
+            child: GoogleMap(
+              initialCameraPosition: CameraPosition(target: myLoc, zoom: 17),
+              markers: markers,
+              onMapCreated: (GoogleMapController controller) {
+                // You can also do something when the map is created here
+              },
+            ),
+          ),
+
+          // ListView Section (Scroll with locations)
+          Expanded(
+            flex: 1, // Set this to control the list height
+            child: ListView.builder(
+              itemCount: positions.length,
+              itemBuilder: (context, index) {
+                LatLng pos = positions[index];
+                return ListTile(
+                  leading: Image.asset(
+                    "assets/ic_pick.png", // Use the same image path
+                    width: 30,
+                    height: 30,
+                  ),
+                  title: Text("Collection Point ${index + 1}"),
+                  subtitle:
+                      Text("Coordinates: (${pos.latitude}, ${pos.longitude})"),
+                  onTap: () {
+                    // Optional: Center map on selected location
+                    //_moveCameraToPosition(pos);
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
+
+  // Future<void> _moveCameraToPosition(LatLng position) async {
+  //   final GoogleMapController controller = await GoogleMapController.init();
+  //   controller.animateCamera(CameraUpdate.newLatLng(position));
+  // }
 
   Future<void> fetchLocationUpdates() async {
     bool serviceEnabled;
