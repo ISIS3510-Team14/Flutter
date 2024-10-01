@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:sustain_u/utils/sustanu_colors.dart';
-import 'routes/app_routes.dart';  // Import your AppRoutes
-import 'constants/app_constants.dart';  // Any constants you might be using
+import 'routes/app_routes.dart';  
+import 'constants/app_constants.dart';  
+import 'package:auth0_flutter/auth0_flutter.dart';
 
 void main() {
   runApp(MyApp());
