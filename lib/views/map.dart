@@ -12,6 +12,8 @@ class GoogleMaps extends StatefulWidget {
 
 class _GoogleMapsState extends State<GoogleMaps> {
   final locationController = Location();
+  final TextEditingController searchController = TextEditingController();
+
   LatLng myLoc = const LatLng(4.601947165813252, -74.06540188488111);
   LatLng? currentPosition;
   List<LatLng> positions = [];
@@ -20,6 +22,8 @@ class _GoogleMapsState extends State<GoogleMaps> {
 
   Set<Marker> markers = {};
   BitmapDescriptor customIcon = BitmapDescriptor.defaultMarker;
+
+  List<String> filteredPoints = [];
 
   @override
   void initState() {
@@ -30,6 +34,7 @@ class _GoogleMapsState extends State<GoogleMaps> {
       await fetchLocationUpdates();
       setMarkers();
     });
+    filteredPoints = point;
   }
 
   Future<void> initData() async {
@@ -83,6 +88,21 @@ class _GoogleMapsState extends State<GoogleMaps> {
     }
   }
 
+  void _filterSearchResults(String query) {
+    List<String> filteredList = [];
+    if (query.isNotEmpty) {
+      filteredList = point
+          .where((p) => p.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    } else {
+      filteredList = point;
+    }
+
+    setState(() {
+      filteredPoints = filteredList;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -130,13 +150,58 @@ class _GoogleMapsState extends State<GoogleMaps> {
                         ],
                       ),
                     ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              spreadRadius: 4,
+                              blurRadius: 5,
+                              offset: Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: TextField(
+                          controller: searchController,
+                          onChanged: (value) {
+                            _filterSearchResults(value);
+                          },
+                          decoration: InputDecoration(
+                            hintText: "Enter a location",
+                            prefixIcon: const Icon(Icons.search),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: Color.fromARGB(36, 158, 158, 158),
+                                width: 0.5,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: Color.fromARGB(36, 158, 158, 158),
+                                width: 0.5,
+                              ),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                                vertical: 10.0, horizontal: 12.0),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
                     Expanded(
                       child: ListView.builder(
                         controller: scrollController,
-                        itemCount: positions.length,
+                        itemCount: filteredPoints.length,
                         itemBuilder: (context, index) {
-                          LatLng pos = positions[index];
-                          String pointName = point[index];
+                          String pointName = filteredPoints[index];
+                          int originalIndex = point.indexOf(pointName);
+                          LatLng pos = positions[originalIndex];
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
                             child: ListTile(
@@ -154,7 +219,7 @@ class _GoogleMapsState extends State<GoogleMaps> {
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(data[index]),
+                                  Text(data[originalIndex]),
                                   const SizedBox(height: 5),
                                   GestureDetector(
                                     onTap: () {},
@@ -174,7 +239,7 @@ class _GoogleMapsState extends State<GoogleMaps> {
                                   MaterialPageRoute(
                                     builder: (context) => GreenPoints(
                                       imagePath: "assets/canecaML.png",
-                                      title: point[index],
+                                      title: point[originalIndex],
                                       description: "5th floor - Near cafeteria",
                                       categories: const [
                                         'Disposables',
