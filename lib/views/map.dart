@@ -88,26 +88,21 @@ class _GoogleMapsState extends State<GoogleMaps> {
     return Scaffold(
       body: Stack(
         children: [
-          // Google Map in the background
           GoogleMap(
             initialCameraPosition: CameraPosition(target: myLoc, zoom: 17),
             markers: markers,
-            onMapCreated: (GoogleMapController controller) {
-              //Do something when the map is created
-            },
+            onMapCreated: (GoogleMapController controller) {},
           ),
-          // ListView Section (Scroll with locations) on top
           DraggableScrollableSheet(
-            initialChildSize:
-                0.45, // Initial size of the sheet (45% of screen height)
-            minChildSize: 0.4, // Minimum size (when collapsed)
-            maxChildSize: 0.6, // Maximum size (when fully expanded)
+            initialChildSize: 0.45,
+            minChildSize: 0.4,
+            maxChildSize: 0.6,
             builder: (context, scrollController) {
               return Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(20.0), // Rounded top corners
+                    top: Radius.circular(20.0),
                   ),
                   boxShadow: [
                     BoxShadow(
@@ -120,7 +115,6 @@ class _GoogleMapsState extends State<GoogleMaps> {
                 ),
                 child: Column(
                   children: [
-                    // Title and arrow icon at the top of the box
                     const Padding(
                       padding: EdgeInsets.all(8.0),
                       child: Column(
@@ -138,48 +132,37 @@ class _GoogleMapsState extends State<GoogleMaps> {
                     ),
                     Expanded(
                       child: ListView.builder(
-                        controller:
-                            scrollController, // Control the scroll behavior
+                        controller: scrollController,
                         itemCount: positions.length,
                         itemBuilder: (context, index) {
-                          //LatLng pos = positions[index];
-                          String pointName =
-                              point[index]; // Get the collection point name
-
+                          LatLng pos = positions[index];
+                          String pointName = point[index];
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
                             child: ListTile(
                               leading: Image.asset(
-                                "assets/ic_pick.png", // Use the same image path
+                                "assets/ic_pick.png",
                                 width: 30,
                                 height: 30,
                               ),
                               title: Text(
                                 pointName,
                                 style: const TextStyle(
-                                  fontWeight:
-                                      FontWeight.bold, // Make title bold
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(data[
-                                      index]), // Regular description (e.g., floor info)
-                                  const SizedBox(
-                                      height:
-                                          5), // Space between description and blue text
+                                  Text(data[index]),
+                                  const SizedBox(height: 5),
                                   GestureDetector(
-                                    onTap: () {
-                                      // Handle tap if needed, e.g., show more details
-                                    },
+                                    onTap: () {},
                                     child: const Text(
-                                      "Recyclables and Organic", // Add specific categories here or make it dynamic
+                                      "Recyclables and Organic",
                                       style: TextStyle(
                                         color: Color.fromRGBO(17, 144, 198, 1),
-                                        fontWeight:
-                                            FontWeight.bold, // Blue text style
-                                        // Optional: underline
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                   ),
@@ -190,17 +173,14 @@ class _GoogleMapsState extends State<GoogleMaps> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => GreenPoints(
-                                      imagePath:
-                                          "assets/canecaML.png", // Replace with the actual image path for the point
-                                      title: point[
-                                          index], // Title for the selected point
-                                      description:
-                                          "5th floor - Near cafeteria", // Description for the point
+                                      imagePath: "assets/canecaML.png",
+                                      title: point[index],
+                                      description: "5th floor - Near cafeteria",
                                       categories: const [
                                         'Disposables',
                                         'Non disposables',
                                         'Organic'
-                                      ], // Categories for the point
+                                      ],
                                     ),
                                   ),
                                 );

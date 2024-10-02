@@ -20,7 +20,7 @@ class GreenPoints extends StatelessWidget {
       appBar: AppBar(
         leading: IconButton(
           icon: Image.asset(
-            'assets/backarrow.png', // Replace with your custom back arrow image
+            'assets/backarrow.png',
             width: 24,
             height: 24,
           ),
@@ -31,17 +31,15 @@ class GreenPoints extends StatelessWidget {
         title: Text(title),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(30.0), // Add padding to the entire view
+        padding: const EdgeInsets.all(30.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Add padding around the image
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: Image.asset(
                 imagePath,
                 width: 400,
-                //fit:  middle,
               ),
             ),
             Text(
@@ -56,16 +54,13 @@ class GreenPoints extends StatelessWidget {
               style: const TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 16),
-            // Categories as blue clickable text
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: categories.map((category) {
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4.0),
                   child: GestureDetector(
-                    onTap: () {
-                      // Handle category tap
-                    },
+                    onTap: () {},
                     child: Text(
                       category,
                       style: const TextStyle(
