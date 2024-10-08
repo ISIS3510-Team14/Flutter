@@ -1,80 +1,138 @@
 import 'package:flutter/material.dart';
-import 'package:auth0_flutter/auth0_flutter.dart';
 import '../utils/sustanu_colors.dart';
+import '../widgets/head.dart';
+import '../widgets/bottom_navbar.dart'; 
 
-class SplashScreen extends StatelessWidget {
-  final auth0 = Auth0(
-    'dev-0jbbiqg2ogpddh7c.us.auth0.com',  // Auth0 domain
-    'wS0DhmlsFTG8UArvrikDn4q2sunD2J0p',  // Auth0 client ID
-  );
-
+class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    // Extract the user's name from the arguments passed to the route
+    final Map<String, dynamic> args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    final String userName = args['name'] ?? 'User';  // Fallback to 'User' if name is null
+
     return Scaffold(
       backgroundColor: SustainUColors.background,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Load the main image
-            Image.network(
-              'https://raw.githubusercontent.com/ISIS3510-Team14/Data/master/img.png',
-              height: 180,
-              width: 180,
-            ),
-            SizedBox(height: 10),
-            // Load the logo
-            Image.network(
-              'https://raw.githubusercontent.com/ISIS3510-Team14/Data/master/logo.png',
-              height: 130,
-              width: 130,
-            ),
-            SizedBox(height: 5),
-            Text(
-              'SustainU',
-              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 30),
-            ElevatedButton(
-              onPressed: () async {
-                try {
-                  // Trigger the Auth0 Universal Login
-                  final result = await auth0.webAuthentication().login(
-                    redirectUrl: 'flutter.SustainU://dev-0jbbiqg2ogpddh7c.us.auth0.com/android/com.sustainu.app/callback',
-                  );
-
-                  print('Logged in: ${result.accessToken}');
-                  print('User name: ${result.user.name}');
-
-                  // Navigate to the app's main content and pass the user's name
-                  Navigator.pushNamed(
-                    context,
-                    '/home',
-                    arguments: {'name': result.user.name},  // Pass the user's name
-                  );
-                } catch (e) {
-                  print('Login failed: $e');
-                }
-              },
-              child: Text('Sign In', style: TextStyle(color: Colors.white)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFFB1CC33),
-                minimumSize: Size(200, 50),
+      bottomNavigationBar: BottomNavBar(),  
+      body: SingleChildScrollView(  
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 20),
+              HeaderWidget(),
+              SizedBox(height: 20),
+              // Display the user's name dynamically
+              Text(
+                'Hi, $userName',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Montserrat',  
+                  color: SustainUColors.text,
+                ),
               ),
-            ),
-            SizedBox(height: 10),
-            TextButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/sign_up');
-              },
-              child: Text('Sign Up', style: TextStyle(color: Color(0xFFB1CC33))),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                side: BorderSide(color: Color(0xFFB1CC33), width: 2),
-                minimumSize: Size(200, 50),
+              SizedBox(height: 10),
+
+              // Card principal
+              Container(
+                height: 120,  
+                width: double.infinity,
+                child: Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Your record',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Montserrat',  
+                            color: SustainUColors.text,
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        Text('68 Points', style: TextStyle(fontFamily: 'Montserrat')),  
+                        Text('99 Days', style: TextStyle(color: SustainUColors.lightBlue, fontFamily: 'Montserrat')),  
+                      ],
+                    ),
+                  ),
+                ),
               ),
-            ),
-          ],
+              SizedBox(height: 10),
+              
+              GridView.count(
+                crossAxisCount: 2,
+                childAspectRatio: 1.5,  
+                mainAxisSpacing: 10,  
+                crossAxisSpacing: 10,  
+                shrinkWrap: true,  
+                physics: NeverScrollableScrollPhysics(), 
+                children: [
+                  _buildGridButton('See green points', Icons.place, SustainUColors.limeGreen),
+                  _buildGridButton('See Scoreboard', Icons.leaderboard, SustainUColors.limeGreen),
+                  _buildGridButton('What can I recycle?', Icons.recycling, SustainUColors.limeGreen),
+                  _buildGridButton('History', Icons.history, SustainUColors.limeGreen),
+                ],
+              ),
+              SizedBox(height: 20),
+              Center(
+                child: Column(
+                  children: [
+                    Text(
+                      'Start Recycling!', 
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,  
+                        fontFamily: 'Montserrat',  
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/camera');
+                      },
+                      child: Text('Scan', style: TextStyle(color: Colors.white, fontFamily: 'Montserrat')),  
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: SustainUColors.limeGreen,
+                        minimumSize: Size(200, 50),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+  }
+
+
+  Widget _buildGridButton(String label, IconData icon, Color color) {
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: InkWell(
+        onTap: () {},
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(icon, color: color, size: 40),  
+                  SizedBox(height: 10),
+                  Text(label, style: TextStyle(fontFamily: 'Montserrat')),  
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
