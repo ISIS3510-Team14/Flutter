@@ -41,3 +41,8 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+#Ignore api key
+/lib/services/openai/api_key.dart
+
+pubspec.lock
