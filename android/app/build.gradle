@@ -23,7 +23,7 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace "com.example.sustain_u"
+    namespace "com.sustainu.app"
     compileSdk flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
 
@@ -42,14 +42,14 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "com.example.sustain_u"
+        applicationId "com.sustainu.app"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
         minSdkVersion flutter.minSdkVersion
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
-        manifestPlaceholders += [auth0Domain: "dev-0jbbiqg2ogpddh7c.us.auth0.com", auth0Scheme: "https"] //auth0
+        manifestPlaceholders += [auth0Domain: "dev-0jbbiqg2ogpddh7c.us.auth0.com", auth0Scheme: "flutter.SustainU"] //auth0
     }
 
     buildTypes {
