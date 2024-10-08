@@ -1,57 +1,119 @@
 import 'package:flutter/material.dart';
-import 'package:sustain_u/utils/sustainu_colors.dart';
-import 'routes/app_routes.dart';  
-import 'constants/app_constants.dart';  
 import 'package:auth0_flutter/auth0_flutter.dart';
+import '../utils/sustainu_colors.dart';
 
-import 'package:camera/camera.dart';  // Import the camera package
-
-void main() async{
-  WidgetsFlutterBinding.ensureInitialized();
-
-  final cameras = await availableCameras();
-
-  // Get a specific camera from the list of available cameras.
-  final firstCamera = cameras.first;
-
-  runApp(MyApp(camera: firstCamera));
+class SplashScreen extends StatefulWidget {
+  @override
+  _SplashScreenState createState() => _SplashScreenState();
 }
 
-class MyApp extends StatelessWidget {
-  final CameraDescription camera;
+class _SplashScreenState extends State<SplashScreen> with WidgetsBindingObserver {
+  final auth0 = Auth0(
+    'dev-0jbbiqg2ogpddh7c.us.auth0.com',  // Auth0 domain
+    'wS0DhmlsFTG8UArvrikDn4q2sunD2J0p',  // Auth0 client ID
+  );
 
-  MyApp({required this.camera});
+  bool _isLoading = false;
+  bool _isLoginInProgress = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      setState(() {
+        _isLoginInProgress = false;
+      });
+    }
+  }
+
+  void _toggleLoading(bool state) {
+    setState(() {
+      _isLoading = state;
+    });
+  }
+
+  Future<void> _handleLogin() async {
+    if (_isLoginInProgress) return;
+
+    _toggleLoading(true);
+    _isLoginInProgress = true;
+
+    try {
+      // Timeout to prevent long delays
+      final result = await auth0.webAuthentication().login(
+        redirectUrl: 'flutter.SustainU://dev-0jbbiqg2ogpddh7c.us.auth0.com/android/com.sustainu.app/callback',
+        // Ensure no custom login pages are being used and Universal Login is served by default
+      ).timeout(Duration(seconds: 60), onTimeout: () {
+        throw Exception('Login timeout. Please try again.');
+      });
+
+      print('Logged in: ${result.accessToken}');
+      print('User name: ${result.user.name}');
+
+      Navigator.pushNamed(
+        context,
+        '/home',
+        arguments: {'name': result.user.name},  // Pass the user's name to home
+      );
+    } catch (e) {
+      print('Login failed: $e');
+    } finally {
+      _toggleLoading(false);
+      _isLoginInProgress = false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: AppConstants.appName,
-      theme: ThemeData(
-        primarySwatch: Colors.green,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-        textTheme: TextTheme(
-          displayLarge: TextStyle(
-            fontFamily: 'Montserrat',
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-            color: SustainUColors.text,
-          ),
-          displayMedium: TextStyle(
-            fontFamily: 'Montserrat',
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: SustainUColors.text,
-          ),
-          displaySmall: TextStyle(
-            fontFamily: 'Montserrat',
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: SustainUColors.text,
-          ),
+    return Scaffold(
+      backgroundColor: SustainUColors.background,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (_isLoading)
+              CircularProgressIndicator(),
+            if (!_isLoading) ...[
+              Image.network(
+                'https://raw.githubusercontent.com/ISIS3510-Team14/Data/master/img.png',
+                height: 180,
+                width: 180,
+              ),
+              SizedBox(height: 10),
+              Image.network(
+                'https://raw.githubusercontent.com/ISIS3510-Team14/Data/master/logo.png',
+                height: 130,
+                width: 130,
+              ),
+              SizedBox(height: 5),
+              Text(
+                'SustainU',
+                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 30),
+              ElevatedButton(
+                onPressed: _handleLogin,
+                child: Text('Login', style: TextStyle(color: Colors.white)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFFB1CC33),
+                  minimumSize: Size(200, 50),
+                ),
+              ),
+            ],
+          ],
         ),
       ),
-      initialRoute: '/',  // Initial route set to splash screen
-      routes: AppRoutes.routes(camera),  // Use the routes from AppRoutes class
     );
   }
 }
