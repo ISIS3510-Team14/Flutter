@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import '../utils/sustainu_colors.dart';
 import 'package:auth0_flutter/auth0_flutter.dart';
-import '../utils/sustanu_colors.dart';
 
 class SplashScreen extends StatelessWidget {
   final auth0 = Auth0(

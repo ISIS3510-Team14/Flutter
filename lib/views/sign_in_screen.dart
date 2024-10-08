@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import '../utils/sustanu_colors.dart';
+import '../widgets/custom_button.dart';
 
 class SignInScreen extends StatefulWidget {
   @override
@@ -137,55 +138,13 @@ class _SignInScreenState extends State<SignInScreen> {
             ),
             SizedBox(height: 30),
             // Sign In Button
-            Center(
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/home');
-                },
-                child: Text(
-                  'Sign In',
-                  style: TextStyle(
-                    fontFamily: 'Montserrat',
-                    color: Colors.white,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: SustainUColors.limeGreen,
-                  minimumSize: Size(200, 50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20), 
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(height: 20),
-            // "Don't have an account? Sign up" Text Button
-            Center(
-              child: RichText(
-                textAlign: TextAlign.center,
-                text: TextSpan(
-                  text: 'Don’t have an account?\n ',
-                  style: TextStyle(
-                    fontFamily: 'Montserrat',
-                    color: SustainUColors.text,
-                    fontSize: 16,
-                  ),
-                  children: [
-                    TextSpan(
-                      text: 'Sign up',
-                      style: TextStyle(
-                        fontFamily: 'Montserrat',
-                        color: SustainUColors.limeGreen,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      recognizer: TapGestureRecognizer()
-                        ..onTap = () {
-                          Navigator.pushNamed(context, '/sign_up');
-                        },
-                    ),
-                  ],
-                ),
-              ),
+            CustomButton(
+              text: 'Sign In',
+
+              color: SustainUColors.limeGreen,
+              onPressed: () {
+                // Handle sign-in logic
+              },
             ),
           ],
         ),

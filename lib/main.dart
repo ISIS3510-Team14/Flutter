@@ -4,11 +4,23 @@ import 'routes/app_routes.dart';
 import 'constants/app_constants.dart';  
 import 'package:auth0_flutter/auth0_flutter.dart';
 
-void main() {
-  runApp(MyApp());
+import 'package:camera/camera.dart';  // Import the camera package
+
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final cameras = await availableCameras();
+
+  // Get a specific camera from the list of available cameras.
+  final firstCamera = cameras.first;
+
+  runApp(MyApp(camera: firstCamera));
 }
 
 class MyApp extends StatelessWidget {
+  final CameraDescription camera;
+
+  MyApp({required this.camera});
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -39,7 +51,7 @@ class MyApp extends StatelessWidget {
         ),
       ),
       initialRoute: '/',  // Initial route set to splash screen
-      routes: AppRoutes.routes,  // Use the routes from AppRoutes class
+      routes: AppRoutes.routes(camera),  // Use the routes from AppRoutes class
     );
   }
 }

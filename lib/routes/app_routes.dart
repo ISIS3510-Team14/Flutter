@@ -11,9 +11,12 @@ import '../views/confirmation_screen.dart';
 import '../views/sign_up2_screen.dart';
 import '../views/home_screen.dart';
 import '../views/profile_screen.dart';
+import '../views/camera_screen.dart';
+import 'package:camera/camera.dart';
 
 class AppRoutes {
-  static Map<String, WidgetBuilder> routes = {
+  static Map<String, WidgetBuilder> routes(CameraDescription camera){
+    return {
     '/': (context) => SplashScreen(),
     '/sign_in': (context) => SignInScreen(),
     '/sign_up': (context) => SignUpScreen(),
@@ -24,6 +27,7 @@ class AppRoutes {
     '/confirmation': (context) => ConfirmationScreen(),
     '/home': (context) => HomeScreen(),
     '/profile': (context) => ProfileScreen(),
-
-  };
+    '/camera': (context) => CameraScreen(camera: camera),
+    };
+  }
 }

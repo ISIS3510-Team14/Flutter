@@ -1,6 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import '../utils/sustanu_colors.dart';
+import '../utils/sustainu_colors.dart';
 import '../widgets/custom_button.dart';
 
 class SignUpScreen extends StatelessWidget {
