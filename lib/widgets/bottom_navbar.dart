@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';  
-import '../utils/sustanu_colors.dart';
+import '../utils/sustainu_colors.dart';
 
 class BottomNavBar extends StatelessWidget {
   @override

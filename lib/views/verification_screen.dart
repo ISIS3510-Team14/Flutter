@@ -1,6 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import '../utils/sustanu_colors.dart';
+import '../utils/sustainu_colors.dart';
 
 class VerificationScreen extends StatelessWidget {
   @override
