@@ -12,7 +12,7 @@ class GreenPoints extends StatelessWidget {
     required this.title,
     required this.description,
     required this.categories,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
