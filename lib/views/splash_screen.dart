@@ -1,101 +1,111 @@
 import 'package:flutter/material.dart';
-import '../utils/sustainu_colors.dart';
 import 'package:auth0_flutter/auth0_flutter.dart';
+import '../utils/sustainu_colors.dart'; // Assuming custom colors
 
-class SplashScreen extends StatelessWidget {
-  final auth0 = Auth0(
-    'dev-0jbbiqg2ogpddh7c.us.auth0.com',  // Auth0 domain
-    'wS0DhmlsFTG8UArvrikDn4q2sunD2J0p',  // Auth0 client ID
-  );
+const appScheme = 'flutter.SustainU';  // Ensure this matches your app scheme
+
+class SplashScreen extends StatefulWidget {
+  @override
+  _SplashScreenState createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  bool _isLoading = false;  // Flag for showing loading indicator
+  String _errorMessage = '';  // Display error messages
+  Credentials? _credentials;  // Hold credentials after login
+  late Auth0 auth0;  // Initialize Auth0
+
+  @override
+  void initState() {
+    super.initState();
+    auth0 = Auth0('dev-0jbbiqg2ogpddh7c.us.auth0.com', 'wS0DhmlsFTG8UArvrikDn4q2sunD2J0p');
+  }
+
+  // Login/Sign up action (combined for simplicity)
+  Future<void> authenticate() async {
+    setState(() {
+      _isLoading = true;  // Show loading indicator
+      _errorMessage = '';  // Clear error message
+    });
+
+    try {
+      // Trigger the Universal Login
+      final credentials = await auth0.webAuthentication(
+        scheme: appScheme,
+      ).login();
+
+      setState(() {
+        _isLoading = false;
+        _credentials = credentials;
+      });
+
+      // Navigate to the home screen, passing user info
+      Navigator.pushNamed(
+        context,
+        '/home',
+        arguments: {'name': credentials.user.name},  // Pass user name to the home screen
+      );
+    } catch (e) {
+      // Handle login error
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'Login failed: ${e.toString()}';
+      });
+      print('Login error: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: SustainUColors.background,
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Load the main image
-            Image.network(
-              'https://raw.githubusercontent.com/ISIS3510-Team14/Data/master/img.png',
-              height: 180,
-              width: 180,
-            ),
-            SizedBox(height: 10),
-            // Load the logo
-            Image.network(
-              'https://raw.githubusercontent.com/ISIS3510-Team14/Data/master/logo.png',
-              height: 130,
-              width: 130,
-            ),
-            SizedBox(height: 5),
-            Text(
-              'SustainU',
-              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 30),
-            ElevatedButton(
-              onPressed: () async {
-                try {
-                  // Trigger the Auth0 Universal Login for Sign In
-                  final result = await auth0.webAuthentication().login(
-                    redirectUrl: 'flutter.SustainU://dev-0jbbiqg2ogpddh7c.us.auth0.com/android/com.sustainu.app/callback',
-                  );
-
-                  print('Logged in: ${result.accessToken}');
-                  print('User name: ${result.user.name}');
-
-                  // Navigate to the app's main content and pass the user's name
-                  Navigator.pushNamed(
-                    context,
-                    '/home',
-                    arguments: {'name': result.user.name},  // Pass the user's name
-                  );
-                } catch (e) {
-                  print('Login failed: $e');
-                }
-              },
-              child: Text('Sign In', style: TextStyle(color: Colors.white)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFFB1CC33),
-                minimumSize: Size(200, 50),
+        child: _isLoading
+            ? CircularProgressIndicator()  // Show a loading indicator if login is in progress
+            : Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Display the app logo
+                  Image.network(
+                    'https://raw.githubusercontent.com/ISIS3510-Team14/Data/master/img.png',
+                    height: 180,
+                    width: 180,
+                  ),
+                  SizedBox(height: 10),
+                  Image.network(
+                    'https://raw.githubusercontent.com/ISIS3510-Team14/Data/master/logo.png',
+                    height: 130,
+                    width: 130,
+                  ),
+                  SizedBox(height: 5),
+                  Text(
+                    'SustainU',
+                    style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 30),
+                  // Login/Sign-up button combined
+                  ElevatedButton(
+                    onPressed: authenticate,  // Perform login or sign up
+                    child: Text('Log in / Sign up', style: TextStyle(color: Colors.white)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFFB1CC33),
+                      minimumSize: Size(220, 60),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15.0),
+                      ),
+                    ),
+                  ),
+                  // Display error message if login fails
+                  if (_errorMessage.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10.0),
+                      child: Text(
+                        _errorMessage,
+                        style: TextStyle(color: Colors.red),  // Display error in red color
+                      ),
+                    ),
+                ],
               ),
-            ),
-            SizedBox(height: 10),
-            TextButton(
-              onPressed: () async {
-                try {
-                  // Trigger the Auth0 Universal Login for Sign Up with screen_hint 'signup'
-                  final result = await auth0.webAuthentication().login(
-                    redirectUrl: 'flutter.SustainU://dev-0jbbiqg2ogpddh7c.us.auth0.com/android/com.sustainu.app/callback',
-                    parameters: {
-                      'screen_hint': 'signup',  // Tell Auth0 to show the Sign Up screen
-                    },
-                  );
-
-                  print('Signed Up: ${result.accessToken}');
-                  print('User name: ${result.user.name}');
-
-                  // Navigate to the app's main content and pass the user's name
-                  Navigator.pushNamed(
-                    context,
-                    '/home',
-                    arguments: {'name': result.user.name},  // Pass the user's name
-                  );
-                } catch (e) {
-                  print('Sign Up failed: $e');
-                }
-              },
-              child: Text('Sign Up', style: TextStyle(color: Color(0xFFB1CC33))),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                side: BorderSide(color: Color(0xFFB1CC33), width: 2),
-                minimumSize: Size(200, 50),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
