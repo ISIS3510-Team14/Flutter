@@ -44,3 +44,5 @@ app.*.map.json
 
 #Ignore api key
 /lib/services/openai/api_key.dart
+
+pubspec.lock
