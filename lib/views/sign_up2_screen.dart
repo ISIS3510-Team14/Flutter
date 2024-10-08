@@ -1,9 +1,8 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import '../utils/sustainu_colors.dart';
-import '../widgets/custom_button.dart';
+import '../utils/sustanu_colors.dart';
 
-class SignUpScreen extends StatelessWidget {
+class SignUp2Screen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,10 +35,10 @@ class SignUpScreen extends StatelessWidget {
               ),
             ),
             SizedBox(height: 30),
-            // Name Field
+            // Phone Number Field (only accepts numbers)
             TextFormField(
               decoration: InputDecoration(
-                labelText: 'Name',
+                labelText: 'Phone number',
                 labelStyle: TextStyle(color: SustainUColors.textLight),
                 filled: true,
                 fillColor: Colors.white,
@@ -63,12 +62,13 @@ class SignUpScreen extends StatelessWidget {
                   ),
                 ),
               ),
+              keyboardType: TextInputType.phone, 
             ),
             SizedBox(height: 20),
-            // Email Field
+            // Zip Code Field (only accepts numbers)
             TextFormField(
               decoration: InputDecoration(
-                labelText: 'Email',
+                labelText: 'Zip code',
                 labelStyle: TextStyle(color: SustainUColors.textLight),
                 filled: true,
                 fillColor: Colors.white,
@@ -92,20 +92,20 @@ class SignUpScreen extends StatelessWidget {
                   ),
                 ),
               ),
+              keyboardType: TextInputType.number, 
             ),
             SizedBox(height: 20),
-            // Password Field
+            // Number Field (only accepts numbers)
             TextFormField(
-              obscureText: true, // Password field
               decoration: InputDecoration(
-                labelText: 'Password',
+                labelText: 'Number',
                 labelStyle: TextStyle(color: SustainUColors.textLight),
                 filled: true,
                 fillColor: Colors.white,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
                   borderSide: BorderSide(
-                    color: Colors.transparent,
+                    color: Colors.grey,
                   ),
                 ),
                 enabledBorder: OutlineInputBorder(
@@ -122,46 +122,17 @@ class SignUpScreen extends StatelessWidget {
                   ),
                 ),
               ),
-            ),
-            SizedBox(height: 20),
-            // Confirm Password
-            TextFormField(
-              obscureText: true, 
-              decoration: InputDecoration(
-                labelText: 'Confirm Password',
-                labelStyle: TextStyle(color: SustainUColors.textLight),
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: BorderSide(
-                    color: Colors.transparent,
-                  ),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: BorderSide(
-                    color: Colors.grey,
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: BorderSide(
-                    color: SustainUColors.limeGreen,
-                    width: 2.0,
-                  ),
-                ),
-              ),
+              keyboardType: TextInputType.number, 
             ),
             SizedBox(height: 30),
-            // Next Button
+            // Sign Up Button
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.pushNamed(context, '/sign_up2');
+                  Navigator.pushNamed(context, '/sign_in');
                 },
                 child: Text(
-                  'Next',
+                  'Sign up',
                   style: TextStyle(
                     fontFamily: 'Montserrat',
                     color: Colors.white,
@@ -171,7 +142,7 @@ class SignUpScreen extends StatelessWidget {
                   backgroundColor: SustainUColors.limeGreen,
                   minimumSize: Size(200, 50),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(20), 
                   ),
                 ),
               ),

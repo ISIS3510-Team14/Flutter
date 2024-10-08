@@ -12,6 +12,9 @@ dependencies:
   flutter:
     sdk: flutter
 
+  auth0_flutter: ^1.7.2 # Para autenticación con Auth0
+  flutter_svg: ^2.0.5
+
   # Dependencia común para íconos de iOS.
   cupertino_icons: ^1.0.2
 
@@ -34,6 +37,8 @@ flutter:
 
   # Si usas fuentes personalizadas
   fonts:
-    - family: SustainUFont
+    - family: Montserrat
       fonts:
-        - asset: assets/fonts/SustainU-Regular.ttf  # Ejemplo de fuente personalizada
+        - asset: fonts/Montserrat-Regular.ttf
+        - asset: fonts/Montserrat-Bold.ttf
+          weight: 700
