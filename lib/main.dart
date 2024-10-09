@@ -6,7 +6,7 @@ import 'package:auth0_flutter/auth0_flutter.dart';
 
 import 'package:camera/camera.dart';  
 
-const appScheme = 'flutterdemo';
+const appScheme = 'flutter.sustainu';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();

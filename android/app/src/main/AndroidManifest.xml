@@ -32,7 +32,7 @@
                 <category android:name="android.intent.category.BROWSABLE"/>
 
                 <data
-                    android:scheme="flutter.SustainU"
+                    android:scheme="flutter.sustainu"
                     android:host="dev-0jbbiqg2ogpddh7c.us.auth0.com"
                     android:pathPrefix="/android/com.sustainu.app/callback" />
             </intent-filter>
