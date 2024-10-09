@@ -6,9 +6,9 @@ import '../widgets/bottom_navbar.dart';
 class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // Extract the user's name from the arguments passed to the route
+    
     final Map<String, dynamic> args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-    final String userName = args['name'] ?? 'User';  // Fallback to 'User' if name is null
+    final String name = args['name'] ?? 'User';  
 
     return Scaffold(
       backgroundColor: SustainUColors.background,
@@ -21,9 +21,9 @@ class HomeScreen extends StatelessWidget {
               SizedBox(height: 20),
               HeaderWidget(),
               SizedBox(height: 20),
-              // Display the user's name dynamically
+              
               Text(
-                'Hi, $userName',
+                'Hi, $name',
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
@@ -33,7 +33,7 @@ class HomeScreen extends StatelessWidget {
               ),
               SizedBox(height: 10),
 
-              // Card principal
+              
               Container(
                 height: 120,  
                 width: double.infinity,
