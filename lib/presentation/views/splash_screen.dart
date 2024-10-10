@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:auth0_flutter/auth0_flutter.dart';
-import '../utils/sustainu_colors.dart';
-import '../services/storage_service.dart';  // Importa la clase de almacenamiento
+import '../../core/utils/sustainu_colors.dart';
+import '../../data/services/storage_service.dart';  // Importa la clase de almacenamiento
 
 const appScheme = 'flutter.sustainu';  
 

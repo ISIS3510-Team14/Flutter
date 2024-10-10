@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/utils/sustainu_colors.dart';
-import '../presentation/widgets/head.dart';
-import '../presentation/widgets/bottom_navbar.dart';
+import '../widgets/head.dart';
+import '../widgets/bottom_navbar.dart';
 import '../../data/services/storage_service.dart';  
 
 class HomeScreen extends StatefulWidget {

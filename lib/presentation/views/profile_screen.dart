@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:auth0_flutter/auth0_flutter.dart';
-import '../utils/sustainu_colors.dart';
+import '../../core/utils/sustainu_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../services/storage_service.dart';  // Importa la clase de almacenamiento
+import '../../data/services/storage_service.dart';  // Importa la clase de almacenamiento
 
 class ProfileScreen extends StatefulWidget {
   @override

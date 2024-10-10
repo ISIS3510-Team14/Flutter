@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:sustain_u/presentation/widgets/bottom_navbar.dart';
-import '../presentation/widgets/camera_widget.dart';
+import '../widgets/camera_widget.dart';
 import 'package:camera/camera.dart';
-import '../presentation/widgets/head.dart';
+import '../widgets/head.dart';
 
 
 class CameraScreen extends StatelessWidget {
