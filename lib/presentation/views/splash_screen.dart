@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:auth0_flutter/auth0_flutter.dart';
-import '../utils/sustainu_colors.dart'; // Assuming custom colors
+import '../../core/utils/sustainu_colors.dart';
+import '../../data/services/storage_service.dart';  // Importa la clase de almacenamiento
 
-const appScheme = 'flutter.SustainU';  // Ensure this matches your app scheme
+const appScheme = 'flutter.sustainu';  
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -10,26 +11,38 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  bool _isLoading = false;  // Flag for showing loading indicator
-  String _errorMessage = '';  // Display error messages
-  Credentials? _credentials;  // Hold credentials after login
-  late Auth0 auth0;  // Initialize Auth0
+  bool _isLoading = false;  
+  String _errorMessage = '';  
+  Credentials? _credentials;  
+  late Auth0 auth0;
+  final StorageService _storageService = StorageService();  // Instancia de la clase StorageService
 
   @override
   void initState() {
     super.initState();
     auth0 = Auth0('dev-0jbbiqg2ogpddh7c.us.auth0.com', 'wS0DhmlsFTG8UArvrikDn4q2sunD2J0p');
+    _checkIfLoggedIn();  // Verifica si ya se ha iniciado sesión previamente
   }
 
-  // Login/Sign up action (combined for simplicity)
+  Future<void> _checkIfLoggedIn() async {
+    // Verifica si ya hay un usuario guardado y navega directamente al Home si existe
+    String? storedUserName = await _storageService.getUserName();
+    if (storedUserName != null) {
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/home',
+        (route) => false,
+      );
+    }
+  }
+
   Future<void> authenticate() async {
     setState(() {
-      _isLoading = true;  // Show loading indicator
-      _errorMessage = '';  // Clear error message
+      _isLoading = true;  
+      _errorMessage = '';  
     });
 
     try {
-      // Trigger the Universal Login
       final credentials = await auth0.webAuthentication(
         scheme: appScheme,
       ).login();
@@ -39,14 +52,16 @@ class _SplashScreenState extends State<SplashScreen> {
         _credentials = credentials;
       });
 
-      // Navigate to the home screen, passing user info
-      Navigator.pushNamed(
+      // Guarda el nombre de usuario en SharedPreferences
+      await _storageService.saveUserName(credentials.user.name ?? 'User');
+
+      Navigator.pushNamedAndRemoveUntil(
         context,
         '/home',
-        arguments: {'name': credentials.user.name},  // Pass user name to the home screen
+        (route) => false,  // Remueve todas las rutas previas
       );
+      
     } catch (e) {
-      // Handle login error
       setState(() {
         _isLoading = false;
         _errorMessage = 'Login failed: ${e.toString()}';
@@ -61,15 +76,15 @@ class _SplashScreenState extends State<SplashScreen> {
       backgroundColor: SustainUColors.background,
       body: Center(
         child: _isLoading
-            ? CircularProgressIndicator()  // Show a loading indicator if login is in progress
+            ? CircularProgressIndicator()  
             : Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // Display the app logo
                   Image.network(
                     'https://raw.githubusercontent.com/ISIS3510-Team14/Data/master/img.png',
-                    height: 180,
-                    width: 180,
+                    height: 250,
+                    width: 250,
                   ),
                   SizedBox(height: 10),
                   Image.network(
@@ -83,9 +98,9 @@ class _SplashScreenState extends State<SplashScreen> {
                     style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 30),
-                  // Login/Sign-up button combined
+                  
                   ElevatedButton(
-                    onPressed: authenticate,  // Perform login or sign up
+                    onPressed: authenticate,  
                     child: Text('Log in / Sign up', style: TextStyle(color: Colors.white)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFFB1CC33),
@@ -95,15 +110,6 @@ class _SplashScreenState extends State<SplashScreen> {
                       ),
                     ),
                   ),
-                  // Display error message if login fails
-                  if (_errorMessage.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10.0),
-                      child: Text(
-                        _errorMessage,
-                        style: TextStyle(color: Colors.red),  // Display error in red color
-                      ),
-                    ),
                 ],
               ),
       ),

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:sustain_u/utils/sustainu_colors.dart';
-import 'routes/app_routes.dart';  
-import 'constants/app_constants.dart';  
+import 'package:sustain_u/core/utils/sustainu_colors.dart';
+import 'core/routes/app_routes.dart';  
+import 'core/constants/app_constants.dart';  
 import 'package:auth0_flutter/auth0_flutter.dart';
 
 import 'package:camera/camera.dart';  
 
-const appScheme = 'flutterdemo';
+const appScheme = 'flutter.sustainu';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();

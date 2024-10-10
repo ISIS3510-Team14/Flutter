@@ -1,5 +1,5 @@
 import 'package:http/http.dart' as http;
-import './api_key.dart';
+import 'api_key.dart';
 import 'dart:convert';
 import '../../models/chat_request.dart';
 

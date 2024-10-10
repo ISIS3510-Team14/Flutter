@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
     <application
         android:label="sustain_u"
         android:name="${applicationName}"
@@ -32,7 +34,7 @@
                 <category android:name="android.intent.category.BROWSABLE"/>
 
                 <data
-                    android:scheme="flutter.SustainU"
+                    android:scheme="flutter.sustainu"
                     android:host="dev-0jbbiqg2ogpddh7c.us.auth0.com"
                     android:pathPrefix="/android/com.sustainu.app/callback" />
             </intent-filter>
@@ -44,6 +46,8 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <meta-data android:name="com.google.android.geo.API_KEY"
+             android:value="AIzaSyCVOktOnLemhOvmtbN4FUXnMBLf9rMMaf8"/>
     </application>
 
     <!-- Required to query activities that can process text, see:

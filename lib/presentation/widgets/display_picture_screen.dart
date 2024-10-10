@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'dart:typed_data';
 import 'dart:convert';
-import '../services/openai/openai_service.dart';
+import '../../data/services/openai/openai_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class TrashTypeIcon {
