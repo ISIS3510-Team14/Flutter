@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';  
-import '../utils/sustainu_colors.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import '../../core/utils/sustainu_colors.dart';
 
 class BottomNavBar extends StatelessWidget {
+  final int currentIndex; // Índice actual, para determinar el seleccionado
+
+  BottomNavBar({required this.currentIndex}); // Constructor que recibe el índice
+
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
       backgroundColor: SustainUColors.background,
       type: BottomNavigationBarType.fixed,
-      currentIndex: 0,
+      currentIndex: currentIndex,
       selectedItemColor: SustainUColors.limeGreen,
       unselectedItemColor: Colors.grey,
       items: [
@@ -16,7 +20,10 @@ class BottomNavBar extends StatelessWidget {
           icon: SvgPicture.network(
             'https://raw.githubusercontent.com/ISIS3510-Team14/Data/master/logos/iconHome.svg',
             height: 24,
-            placeholderBuilder: (context) => CircularProgressIndicator(), // Muestra un placeholder mientras carga el SVG
+            colorFilter: currentIndex == 0
+                ? ColorFilter.mode(SustainUColors.limeGreen, BlendMode.srcIn)
+                : ColorFilter.mode(Colors.grey, BlendMode.srcIn),
+            placeholderBuilder: (context) => CircularProgressIndicator(),
           ),
           label: 'Home',
         ),
@@ -24,6 +31,9 @@ class BottomNavBar extends StatelessWidget {
           icon: SvgPicture.network(
             'https://raw.githubusercontent.com/ISIS3510-Team14/Data/master/logos/iconMap.svg',
             height: 24,
+            colorFilter: currentIndex == 1
+                ? ColorFilter.mode(SustainUColors.limeGreen, BlendMode.srcIn)
+                : ColorFilter.mode(Colors.grey, BlendMode.srcIn),
             placeholderBuilder: (context) => CircularProgressIndicator(),
           ),
           label: 'Map',
@@ -32,6 +42,9 @@ class BottomNavBar extends StatelessWidget {
           icon: SvgPicture.network(
             'https://raw.githubusercontent.com/ISIS3510-Team14/Data/master/logos/iconCamera.svg',
             height: 24,
+            colorFilter: currentIndex == 2
+                ? ColorFilter.mode(SustainUColors.limeGreen, BlendMode.srcIn)
+                : ColorFilter.mode(Colors.grey, BlendMode.srcIn),
             placeholderBuilder: (context) => CircularProgressIndicator(),
           ),
           label: 'Camera',
@@ -40,6 +53,9 @@ class BottomNavBar extends StatelessWidget {
           icon: SvgPicture.network(
             'https://raw.githubusercontent.com/ISIS3510-Team14/Data/master/logos/iconRecycle.svg',
             height: 24,
+            colorFilter: currentIndex == 3
+                ? ColorFilter.mode(SustainUColors.limeGreen, BlendMode.srcIn)
+                : ColorFilter.mode(Colors.grey, BlendMode.srcIn),
             placeholderBuilder: (context) => CircularProgressIndicator(),
           ),
           label: 'Recycle',
@@ -48,6 +64,9 @@ class BottomNavBar extends StatelessWidget {
           icon: SvgPicture.network(
             'https://raw.githubusercontent.com/ISIS3510-Team14/Data/master/logos/iconScoreboard.svg',
             height: 24,
+            colorFilter: currentIndex == 4
+                ? ColorFilter.mode(SustainUColors.limeGreen, BlendMode.srcIn)
+                : ColorFilter.mode(Colors.grey, BlendMode.srcIn),
             placeholderBuilder: (context) => CircularProgressIndicator(),
           ),
           label: 'Scoreboard',
