@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:auth0_flutter/auth0_flutter.dart';
-import '../utils/sustainu_colors.dart'; 
+import '../utils/sustainu_colors.dart';
+import '../services/storage_service.dart';  // Importa la clase de almacenamiento
 
 const appScheme = 'flutter.sustainu';  
 
@@ -13,12 +14,26 @@ class _SplashScreenState extends State<SplashScreen> {
   bool _isLoading = false;  
   String _errorMessage = '';  
   Credentials? _credentials;  
-  late Auth0 auth0;  
+  late Auth0 auth0;
+  final StorageService _storageService = StorageService();  // Instancia de la clase StorageService
 
   @override
   void initState() {
     super.initState();
     auth0 = Auth0('dev-0jbbiqg2ogpddh7c.us.auth0.com', 'wS0DhmlsFTG8UArvrikDn4q2sunD2J0p');
+    _checkIfLoggedIn();  // Verifica si ya se ha iniciado sesión previamente
+  }
+
+  Future<void> _checkIfLoggedIn() async {
+    // Verifica si ya hay un usuario guardado y navega directamente al Home si existe
+    String? storedUserName = await _storageService.getUserName();
+    if (storedUserName != null) {
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/home',
+        (route) => false,
+      );
+    }
   }
 
   Future<void> authenticate() async {
@@ -36,14 +51,14 @@ class _SplashScreenState extends State<SplashScreen> {
         _isLoading = false;
         _credentials = credentials;
       });
-      print('User token: ${credentials.accessToken}');
-      
-    
+
+      // Guarda el nombre de usuario en SharedPreferences
+      await _storageService.saveUserName(credentials.user.name ?? 'User');
+
       Navigator.pushNamedAndRemoveUntil(
         context,
         '/home',
-        (route) => false,  
-        arguments: {'name': credentials.user.name},  
+        (route) => false,  // Remueve todas las rutas previas
       );
       
     } catch (e) {
@@ -53,7 +68,6 @@ class _SplashScreenState extends State<SplashScreen> {
       });
       print('Login error: $e');
     }
-    
   }
 
   @override
@@ -96,8 +110,6 @@ class _SplashScreenState extends State<SplashScreen> {
                       ),
                     ),
                   ),
-                  
-                
                 ],
               ),
       ),

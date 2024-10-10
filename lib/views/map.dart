@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:sustain_u/views/greenpoints.dart';
+import 'package:sustain_u/widgets/bottom_navbar.dart';
+import '../widgets/head.dart';
 
 class GoogleMaps extends StatefulWidget {
   const GoogleMaps({super.key});
@@ -112,6 +114,12 @@ class _GoogleMapsState extends State<GoogleMaps> {
             initialCameraPosition: CameraPosition(target: myLoc, zoom: 17),
             markers: markers,
             onMapCreated: (GoogleMapController controller) {},
+          ),
+          Positioned(
+            top: 0,  // Mantener el header en la parte superior
+            left: 0,
+            right: 0,
+            child: HeaderWidget(),
           ),
           DraggableScrollableSheet(
             initialChildSize: 0.45,
@@ -262,23 +270,17 @@ class _GoogleMapsState extends State<GoogleMaps> {
           ),
         ],
       ),
+      bottomNavigationBar: BottomNavBar(currentIndex: 1), // Navbar en la parte inferior
     );
   }
-
-  // Future<void> _moveCameraToPosition(LatLng position) async {
-  //   final GoogleMapController controller = await GoogleMapController.init();
-  //   controller.animateCamera(CameraUpdate.newLatLng(position));
-  // }
 
   Future<void> fetchLocationUpdates() async {
     bool serviceEnabled;
     PermissionStatus permissionGranted;
 
     serviceEnabled = await locationController.serviceEnabled();
-    if (serviceEnabled) {
+    if (!serviceEnabled) {
       serviceEnabled = await locationController.requestService();
-    } else {
-      return;
     }
 
     permissionGranted = await locationController.hasPermission();

@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'display_picture_screen.dart'; // Import the new file for displaying the picture
+import 'display_picture_screen.dart'; 
+
 
 class CameraWidget extends StatefulWidget {
   final CameraDescription camera;

@@ -1,14 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:auth0_flutter/auth0_flutter.dart';
 import '../utils/sustainu_colors.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../services/storage_service.dart';  // Importa la clase de almacenamiento
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
+  @override
+  _ProfileScreenState createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
   final Auth0 auth0 = Auth0('dev-0jbbiqg2ogpddh7c.us.auth0.com', 'wS0DhmlsFTG8UArvrikDn4q2sunD2J0p');
+  final StorageService _storageService = StorageService();  // Instancia de la clase StorageService
+  String _userName = 'Unknown User';  // Default name
+  String _userEmail = 'Unknown Email';  // Default email
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserProfile();  // Cargar el perfil del usuario
+  }
+
+  Future<void> _loadUserProfile() async {
+    // Cargar el nombre y correo desde SharedPreferences
+    String? storedUserName = await _storageService.getUserName();
+    setState(() {
+      _userName = storedUserName ?? 'Unknown User';
+    });
+
+    // Nota: Si también guardaste el correo en `SharedPreferences`, puedes cargarlo de la misma manera.
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? email = prefs.getString('userEmail');  // Puedes guardar el email en el login
+    setState(() {
+      _userEmail = email ?? 'Unknown Email';
+    });
+  }
 
   Future<void> logoutAction(BuildContext context) async {
     try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.clear();  // Limpiar todos los datos del usuario
       await auth0.webAuthentication(scheme: 'flutter.sustainu').logout();
-      Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);  
+      Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);  // Navegar de vuelta al login
     } catch (e) {
       print('Logout failed: $e');
     }
@@ -16,10 +49,6 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final credentials = ModalRoute.of(context)!.settings.arguments as Credentials?;
-    final userName = credentials?.user.name ?? 'Unknown User';
-    final userEmail = credentials?.user.email ?? 'Unknown Email';
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: SustainUColors.background,
@@ -37,21 +66,9 @@ class ProfileScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ListTile(
-              leading: Icon(Icons.account_circle, color: SustainUColors.text),
-              title: Text('Perfil', style: TextStyle(color: SustainUColors.text)),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => EditProfileScreen(),  
-                  ),
-                );
-              },
-            ),
             SizedBox(height: 20),
             Text(
-              userName,
+              _userName,
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
@@ -60,7 +77,7 @@ class ProfileScreen extends StatelessWidget {
             ),
             SizedBox(height: 10),
             Text(
-              userEmail,
+              _userEmail,
               style: TextStyle(
                 fontSize: 18,
                 color: SustainUColors.text,
@@ -76,22 +93,6 @@ class ProfileScreen extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class EditProfileScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Editar Perfil'),
-        backgroundColor: SustainUColors.background,
-      ),
-      backgroundColor: SustainUColors.background,
-      body: Center(
-        child: Text('Aquí puedes editar tu perfil'),  
       ),
     );
   }
