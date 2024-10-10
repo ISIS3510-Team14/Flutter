@@ -3,7 +3,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:sustain_u/presentation/views/greenpoints.dart';
 import 'package:sustain_u/presentation/widgets/bottom_navbar.dart';
-import '../presentation/widgets/head.dart';
+import '../widgets/head.dart';
 
 class GoogleMaps extends StatefulWidget {
   const GoogleMaps({super.key});

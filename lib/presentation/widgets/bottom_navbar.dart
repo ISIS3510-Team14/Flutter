@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import '../utils/sustainu_colors.dart';
+import '../../core/utils/sustainu_colors.dart';
 
 class BottomNavBar extends StatelessWidget {
   final int currentIndex; // Índice actual, para determinar el seleccionado
