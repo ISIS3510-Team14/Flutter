@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:sustain_u/views/home_screen.dart';
+import 'package:sustain_u/views/map.dart';
 import 'package:sustain_u/views/profile_screen.dart';
 import '../views/splash_screen.dart';
 import '../views/sign_in_screen.dart';
 import '../views/verification_screen.dart';
-import '../views/home_screen.dart';
-import '../views/profile_screen.dart';
 import '../views/camera_screen.dart';
 import 'package:camera/camera.dart';
 
@@ -18,6 +17,7 @@ class AppRoutes {
     '/home': (context) => HomeScreen(),
     '/profile': (context) => ProfileScreen(),
     '/camera': (context) => CameraScreen(camera: camera),
+    '/map': (context) => GoogleMaps(),
     };
   }
 }
