@@ -1,4 +1,4 @@
-package com.example.sustain_u
+package com.sustainu.app
 
 import io.flutter.embedding.android.FlutterActivity
 

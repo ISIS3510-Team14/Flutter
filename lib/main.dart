@@ -1,14 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:sustain_u/views/map.dart';
+import 'package:sustain_u/utils/sustainu_colors.dart';
+import 'routes/app_routes.dart';  
+import 'package:sustain_u/views/map.dart';
+import 'constants/app_constants.dart';  
+import 'package:auth0_flutter/auth0_flutter.dart';
 
-void main() {
-  runApp(const MyApp());
+import 'package:camera/camera.dart';  
+
+const appScheme = 'flutter.sustainu';
+
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final cameras = await availableCameras();
+
+  final firstCamera = cameras.first;
+
+  runApp(MyApp(camera: firstCamera));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final CameraDescription camera;
 
-  // This widget is the root of your application.
+  MyApp({required this.camera});
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -117,11 +132,8 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      initialRoute: '/',  
+      routes: AppRoutes.routes(camera),  
     );
   }
 }

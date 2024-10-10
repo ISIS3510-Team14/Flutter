@@ -25,7 +25,22 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+
+            <!-- Intent filter to handle the Auth0 callback URL -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+
+                <data
+                    android:scheme="flutter.sustainu"
+                    android:host="dev-0jbbiqg2ogpddh7c.us.auth0.com"
+                    android:pathPrefix="/android/com.sustainu.app/callback" />
+            </intent-filter>
+
         </activity>
+
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data
@@ -34,6 +49,7 @@
         <meta-data android:name="com.google.android.geo.API_KEY"
              android:value="AIzaSyCVOktOnLemhOvmtbN4FUXnMBLf9rMMaf8"/>
     </application>
+
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility?hl=en and
          https://developer.android.com/reference/android/content/Intent#ACTION_PROCESS_TEXT.
