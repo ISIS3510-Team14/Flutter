@@ -7,11 +7,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:sustain_u/main.dart';
-
 import 'package:camera/camera.dart';
-import 'package:sustain_u/presentation/views/camera_screen.dart';  // Import the camera package
+import 'package:sustain_u/presentation/views/camera_screen.dart'; // Import the camera package
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {

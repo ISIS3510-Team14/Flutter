@@ -44,10 +44,17 @@ dependencies:
   auth0_flutter: ^1.7.2
   flutter_svg: ^2.0.5
   shared_preferences: ^2.0.0
+  firebase_core: ^2.4.1
+  firebase_analytics: ^10.10.7
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: ^0.13.0
+
+flutter_icons:
+  android: true
+  image_path: "assets/su.png"
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -63,6 +70,7 @@ dev_dependencies:
 flutter:
   assets:
   - assets/
+  - assets/su.png
     #-ic_pick.png
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
