@@ -16,13 +16,13 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _loadUserName(); 
+    _loadUserProfile(); 
   }
 
-  Future<void> _loadUserName() async {
-    String? name = await _storageService.getUserName();
+  Future<void> _loadUserProfile() async {
+    Map<String, dynamic>? credentials = await _storageService.getUserCredentials();
     setState(() {
-      _name = name ?? 'User';  
+      _name = credentials?['nickname'] ?? 'User';
     });
   }
 

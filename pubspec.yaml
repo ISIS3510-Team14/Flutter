@@ -44,6 +44,8 @@ dependencies:
   auth0_flutter: ^1.7.2
   flutter_svg: ^2.0.5
   shared_preferences: ^2.0.0
+  cloud_firestore: ^5.4.4
+  jwt_decoder: ^2.0.1
 
 dev_dependencies:
   flutter_test:

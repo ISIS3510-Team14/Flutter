@@ -116,7 +116,7 @@ class _GoogleMapsState extends State<GoogleMaps> {
             onMapCreated: (GoogleMapController controller) {},
           ),
           Positioned(
-            top: 0,  // Mantener el header en la parte superior
+            top: 0,  
             left: 0,
             right: 0,
             child: HeaderWidget(),
@@ -270,7 +270,7 @@ class _GoogleMapsState extends State<GoogleMaps> {
           ),
         ],
       ),
-      bottomNavigationBar: BottomNavBar(currentIndex: 1), // Navbar en la parte inferior
+      bottomNavigationBar: BottomNavBar(currentIndex: 1), 
     );
   }
 
