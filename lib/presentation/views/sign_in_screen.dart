@@ -32,7 +32,7 @@ class _SignInScreenState extends State<SignInScreen> {
               ),
             ),
             SizedBox(height: 20),
-            // Welcome Text aligned to the left
+            
             Text(
               'Welcome back!',
               style: TextStyle(
@@ -43,7 +43,7 @@ class _SignInScreenState extends State<SignInScreen> {
               ),
             ),
             SizedBox(height: 30),
-            // Username Field
+            
             TextFormField(
               decoration: InputDecoration(
                 labelText: 'Username',
@@ -76,7 +76,7 @@ class _SignInScreenState extends State<SignInScreen> {
             ),
             SizedBox(height: 20),
             
-            // Password
+            
             TextFormField(
               obscureText: _obscurePassword,
               decoration: InputDecoration(
@@ -137,13 +137,13 @@ class _SignInScreenState extends State<SignInScreen> {
               ),
             ),
             SizedBox(height: 30),
-            // Sign In Button
+            
             CustomButton(
               text: 'Sign In',
 
               color: SustainUColors.limeGreen,
               onPressed: () {
-                // Handle sign-in logic
+                
               },
             ),
           ],

@@ -3,9 +3,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/utils/sustainu_colors.dart';
 
 class BottomNavBar extends StatelessWidget {
-  final int currentIndex; // Índice actual, para determinar el seleccionado
+  final int currentIndex;
 
-  BottomNavBar({required this.currentIndex}); // Constructor que recibe el índice
+  BottomNavBar({required this.currentIndex}); 
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +73,7 @@ class BottomNavBar extends StatelessWidget {
         ),
       ],
       onTap: (index) {
-        // Lógica para cambiar de pantalla según el índice
+        
         switch (index) {
           case 0:
             Navigator.pushNamed(context, '/home');
