@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:sustain_u/core/utils/sustainu_colors.dart';
-import 'core/routes/app_routes.dart';  
-import 'core/constants/app_constants.dart';  
-import 'package:auth0_flutter/auth0_flutter.dart';
-
-import 'package:camera/camera.dart';  
+import 'core/routes/app_routes.dart';
+import 'core/constants/app_constants.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:camera/camera.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:flutter/material.dart';
 
 const appScheme = 'flutter.sustainu';
 
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final cameras = await availableCameras();
-
   final firstCamera = cameras.first;
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   runApp(MyApp(camera: firstCamera));
 }
@@ -21,10 +26,15 @@ void main() async{
 class MyApp extends StatelessWidget {
   final CameraDescription camera;
 
+  static FirebaseAnalytics analytics = FirebaseAnalytics.instance;
+  static FirebaseAnalyticsObserver observer =
+      FirebaseAnalyticsObserver(analytics: analytics);
+
   MyApp({required this.camera});
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorObservers: [observer],
       debugShowCheckedModeBanner: false,
       title: AppConstants.appName,
       theme: ThemeData(
@@ -51,8 +61,8 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      initialRoute: '/',  
-      routes: AppRoutes.routes(camera),  
+      initialRoute: '/',
+      routes: AppRoutes.routes(camera),
     );
   }
 }
