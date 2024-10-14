@@ -48,3 +48,4 @@ app.*.map.json
 /lib/services/openai/api_key.dart
 
 pubspec.lock
+android/app/google-services.json
