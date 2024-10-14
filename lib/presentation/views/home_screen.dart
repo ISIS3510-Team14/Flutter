@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/utils/sustainu_colors.dart';
 import '../widgets/head.dart';
 import '../widgets/bottom_navbar.dart';
-import '../../data/services/storage_service.dart';  
+import '../../data/services/storage_service.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -10,19 +11,19 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String _name = 'User';  
-  final StorageService _storageService = StorageService();  
+  String _name = 'User';
+  final StorageService _storageService = StorageService();
 
   @override
   void initState() {
     super.initState();
-    _loadUserProfile(); 
+    _loadUserProfile();
   }
 
   Future<void> _loadUserProfile() async {
     Map<String, dynamic>? credentials = await _storageService.getUserCredentials();
     setState(() {
-      _name = credentials?['nickname'] ?? 'User';
+      _name = credentials?['full_name'] ?? 'User';
     });
   }
 
@@ -30,8 +31,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: SustainUColors.background,
-      bottomNavigationBar: BottomNavBar(currentIndex: 0),  
-      body: SingleChildScrollView(  
+      bottomNavigationBar: BottomNavBar(currentIndex: 0),
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,20 +40,18 @@ class _HomeScreenState extends State<HomeScreen> {
             SizedBox(height: 20),
             HeaderWidget(),
             SizedBox(height: 20),
-            
             Text(
               'Hi, $_name',
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
-                fontFamily: 'Montserrat',  
+                fontFamily: 'Montserrat',
                 color: SustainUColors.text,
               ),
             ),
             SizedBox(height: 10),
-
             Container(
-              height: 120,  
+              height: 120,
               width: double.infinity,
               child: Card(
                 shape: RoundedRectangleBorder(
@@ -68,32 +67,57 @@ class _HomeScreenState extends State<HomeScreen> {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          fontFamily: 'Montserrat',  
+                          fontFamily: 'Montserrat',
                           color: SustainUColors.text,
                         ),
                       ),
                       SizedBox(height: 10),
-                      Text('68 Points', style: TextStyle(fontFamily: 'Montserrat')),  
-                      Text('99 Days', style: TextStyle(color: SustainUColors.lightBlue, fontFamily: 'Montserrat')),  
+                      Text('68 Points', style: TextStyle(fontFamily: 'Montserrat')),
+                      Text(
+                        '99 Days',
+                        style: TextStyle(
+                          color: SustainUColors.lightBlue,
+                          fontFamily: 'Montserrat',
+                        ),
+                      ),
                     ],
                   ),
                 ),
               ),
             ),
             SizedBox(height: 10),
-            
             GridView.count(
               crossAxisCount: 2,
-              childAspectRatio: 1.5,  
-              mainAxisSpacing: 10,  
-              crossAxisSpacing: 10,  
-              shrinkWrap: true,  
-              physics: NeverScrollableScrollPhysics(), 
+              childAspectRatio: 1.5,
+              mainAxisSpacing: 10,
+              crossAxisSpacing: 10,
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
               children: [
-                _buildGridButton('See green points', Icons.place, SustainUColors.limeGreen),
-                _buildGridButton('See Scoreboard', Icons.leaderboard, SustainUColors.limeGreen),
-                _buildGridButton('What can I recycle?', Icons.recycling, SustainUColors.limeGreen),
-                _buildGridButton('History', Icons.history, SustainUColors.limeGreen),
+                _buildGridButton(
+                  'See green points',
+                  'https://raw.githubusercontent.com/ISIS3510-Team14/Data/master/logos/iconMap.svg',
+                  SustainUColors.limeGreen,
+                  '/map',
+                ),
+                _buildGridButton(
+                  'See Scoreboard',
+                  'https://raw.githubusercontent.com/ISIS3510-Team14/Data/master/logos/iconScoreboard.svg',
+                  SustainUColors.limeGreen,
+                  '/scoreboard',
+                ),
+                _buildGridButton(
+                  'What can I recycle?',
+                  'https://raw.githubusercontent.com/ISIS3510-Team14/Data/master/logos/iconRecycle.svg',
+                  SustainUColors.limeGreen,
+                  '/recycle',
+                ),
+                _buildGridButton(
+                  'History',
+                  Icons.history, 
+                  SustainUColors.limeGreen,
+                  '/history',
+                ),
               ],
             ),
             SizedBox(height: 20),
@@ -101,11 +125,11 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 children: [
                   Text(
-                    'Start Recycling!', 
+                    'Start Recycling!',
                     style: TextStyle(
                       fontSize: 18,
-                      fontWeight: FontWeight.bold,  
-                      fontFamily: 'Montserrat',  
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Montserrat',
                     ),
                   ),
                   SizedBox(height: 10),
@@ -113,7 +137,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     onPressed: () {
                       Navigator.pushNamed(context, '/camera');
                     },
-                    child: Text('Scan', style: TextStyle(color: Colors.white, fontFamily: 'Montserrat')),  
+                    child: Text(
+                      'Scan',
+                      style: TextStyle(color: Colors.white, fontFamily: 'Montserrat'),
+                    ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: SustainUColors.limeGreen,
                       minimumSize: Size(200, 50),
@@ -128,13 +155,15 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildGridButton(String label, IconData icon, Color color) {
+  Widget _buildGridButton(String label, dynamic icon, Color color, String route) {
     return Card(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
       child: InkWell(
-        onTap: () {},
+        onTap: () {
+          Navigator.pushNamed(context, route);
+        },
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Row(
@@ -142,9 +171,16 @@ class _HomeScreenState extends State<HomeScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(icon, color: color, size: 40),  
+                  icon is String
+                      ? SvgPicture.network(
+                          icon,
+                          height: 40,
+                          colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+                          placeholderBuilder: (context) => CircularProgressIndicator(),
+                        )
+                      : Icon(icon, color: color, size: 40),
                   SizedBox(height: 10),
-                  Text(label, style: TextStyle(fontFamily: 'Montserrat')),  
+                  Text(label, style: TextStyle(fontFamily: 'Montserrat')),
                 ],
               ),
             ],
