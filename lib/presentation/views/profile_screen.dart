@@ -17,7 +17,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   String _fullName = 'Unknown User';
   String _email = 'Unknown Email';
-  String _lastLogin = 'Unknown Date';
+  //String _lastLogin = 'Unknown Date';
 
   @override
   void initState() {
@@ -32,7 +32,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() {
       _fullName = userProfile?['full_name'] ?? 'Unknown User';
       _email = userProfile?['email'] ?? 'Unknown Email';
-      _lastLogin = userProfile?['last_login'] ?? 'Unknown Date';
+      //_lastLogin = userProfile?['last_login'] ?? 'Unknown Date';
     });
   }
 
@@ -107,7 +107,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             SizedBox(height: 20),
             _buildInfoRow('Name', _fullName),
             _buildInfoRow('Email', _email),
-            _buildInfoRow('Last Login', _lastLogin),
             SizedBox(height: 20),
             ListTile(
               leading: Icon(Icons.exit_to_app, color: SustainUColors.text),
