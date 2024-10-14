@@ -25,7 +25,8 @@ dependencies:
   http: ^0.13.3      # Si estás usando API o webhooks.
   flutter_svg: ^1.0.3  # Si estás usando imágenes SVG.
   # Añade cualquier otro paquete que necesites, como firebase si lo usas.
-  cloud_firestore: ^5.4.44
+  firebase_core: ^2.4.1
+  firebase_analytics: ^10.10.7
   jwt_decoder: ^2.0.1
 
 dev_dependencies:
