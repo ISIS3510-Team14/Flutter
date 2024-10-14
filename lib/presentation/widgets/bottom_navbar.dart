@@ -1,11 +1,17 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/utils/sustainu_colors.dart';
 
 class BottomNavBar extends StatelessWidget {
   final int currentIndex; // Índice actual, para determinar el seleccionado
+  static FirebaseAnalytics analytics = FirebaseAnalytics.instance;
+  static FirebaseAnalyticsObserver observer =
+      FirebaseAnalyticsObserver(analytics: analytics);
 
-  BottomNavBar({required this.currentIndex}); // Constructor que recibe el índice
+  BottomNavBar(
+      {super.key,
+      required this.currentIndex}); // Constructor que recibe el índice
 
   @override
   Widget build(BuildContext context) {
@@ -72,8 +78,13 @@ class BottomNavBar extends StatelessWidget {
           label: 'Scoreboard',
         ),
       ],
-      onTap: (index) {
-        // Lógica para cambiar de pantalla según el índice
+      onTap: (index) async {
+        // Log the event before navigating
+        await analytics.logEvent(
+          name: 'feature_accessing',
+          parameters: <String, dynamic>{'index': index},
+        );
+
         switch (index) {
           case 0:
             Navigator.pushNamed(context, '/home');
