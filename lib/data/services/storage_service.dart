@@ -1,23 +1,26 @@
+import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class StorageService {
-  static const String _userNameKey = 'userName';
+  static const String _userCredentialsKey = 'userCredentials';
 
-  // Guardar el nombre de usuario en SharedPreferences
-  Future<void> saveUserName(String userName) async {
+  Future<void> saveUserCredentials(Map<String, dynamic> credentials) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_userNameKey, userName);
+    String credentialsJson = jsonEncode(credentials);
+    await prefs.setString(_userCredentialsKey, credentialsJson);
   }
 
-  // Obtener el nombre de usuario de SharedPreferences
-  Future<String?> getUserName() async {
+  Future<Map<String, dynamic>?> getUserCredentials() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_userNameKey);
+    String? credentialsJson = prefs.getString(_userCredentialsKey);
+    if (credentialsJson != null) {
+      return jsonDecode(credentialsJson);
+    }
+    return null;
   }
 
-  // Limpiar los datos guardados (puedes usar esto para el logout)
   Future<void> clearUserData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_userNameKey);
+    await prefs.remove(_userCredentialsKey);
   }
 }
