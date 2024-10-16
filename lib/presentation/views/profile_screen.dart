@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/utils/sustainu_colors.dart';
 import '../../data/services/storage_service.dart';
-import 'package:auth0_flutter/auth0_flutter.dart'; 
+import 'package:auth0_flutter/auth0_flutter.dart';
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -15,9 +15,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     'wS0DhmlsFTG8UArvrikDn4q2sunD2J0p',
   );
 
-  String _fullName = 'Unknown User';
+  String _nickname = 'Unknown User';
   String _email = 'Unknown Email';
-  //String _lastLogin = 'Unknown Date';
+  String? _profilePicture; // Variable para almacenar la URL de la imagen
 
   @override
   void initState() {
@@ -26,13 +26,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _loadUserProfile() async {
-    Map<String, dynamic>? userProfile =
-        await _storageService.getUserCredentials();
+    Map<String, dynamic>? userProfile = await _storageService.getUserCredentials();
 
     setState(() {
-      _fullName = userProfile?['full_name'] ?? 'Unknown User';
+      _nickname = userProfile?['nickname'] ?? 'Unknown User';
       _email = userProfile?['email'] ?? 'Unknown Email';
-      //_lastLogin = userProfile?['last_login'] ?? 'Unknown Date';
+      _profilePicture = userProfile?['picture']; // Recupera la imagen guardada
     });
   }
 
@@ -95,17 +94,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Mostrar la imagen de perfil o un ícono por defecto si no está disponible
             CircleAvatar(
               radius: 50,
               backgroundColor: Colors.blue,
-              child: Icon(
-                Icons.flutter_dash,
-                size: 50,
-                color: Colors.white,
-              ),
+              backgroundImage: _profilePicture != null && _profilePicture!.isNotEmpty
+                  ? NetworkImage(_profilePicture!)
+                  : null,
+              child: _profilePicture == null || _profilePicture!.isEmpty
+                  ? Icon(
+                      Icons.person,
+                      size: 50,
+                      color: Colors.white,
+                    )
+                  : null,
             ),
             SizedBox(height: 20),
-            _buildInfoRow('Name', _fullName),
+            _buildInfoRow('Username', _nickname),
             _buildInfoRow('Email', _email),
             SizedBox(height: 20),
             ListTile(
