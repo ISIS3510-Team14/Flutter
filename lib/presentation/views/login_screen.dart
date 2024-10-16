@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:auth0_flutter/auth0_flutter.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';  
 import '../../core/utils/sustainu_colors.dart';
 import '../../data/services/storage_service.dart';
 
@@ -43,18 +44,20 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       final credentials = await auth0.webAuthentication(scheme: appScheme).login();
 
-      final userProfile = credentials.user;
+      // Decodificando el idToken para acceder a los claims
+      Map<String, dynamic> decodedToken = JwtDecoder.decode(credentials.idToken);
 
-      final lastLogin = userProfile.updatedAt?.toIso8601String() ?? 'Unknown Date';
-
-      final fullName = userProfile.name ?? 'Unknown User';
-      final nickname = userProfile.nickname ?? 'Unknown';
+      final lastLogin = credentials.user.updatedAt?.toIso8601String() ?? 'Unknown Date';
+      final fullName = decodedToken['name'] ?? 'Unknown User';
+      final nickname = decodedToken['nickname'] ?? 'Unknown';
+      final pictureUrl = decodedToken['picture'] ?? '';  
 
       final userData = {
         'full_name': fullName,
         'nickname': nickname,
-        'email': userProfile.email ?? 'Unknown Email',
+        'email': credentials.user.email ?? 'Unknown Email',
         'last_login': lastLogin,
+        'picture': pictureUrl,  // Guardando la imagen
       };
 
       await _storageService.saveUserCredentials(userData);

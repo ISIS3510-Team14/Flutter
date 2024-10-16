@@ -48,7 +48,7 @@ dependencies:
   firebase_analytics: ^10.10.7
   jwt_decoder: ^2.0.1
   dart_jsonwebtoken: ^2.14.1
-  googleapis: ^13.2.0
+ 
 
 dev_dependencies:
   flutter_test:
