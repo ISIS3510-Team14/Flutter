@@ -22,6 +22,7 @@ class _GoogleMapsState extends State<GoogleMaps> {
   List<String> filteredPoints = [];
   Set<Marker> markers = {};
   BitmapDescriptor customIcon = BitmapDescriptor.defaultMarker;
+  GoogleMapController? _mapController;
 
   @override
   void initState() {
@@ -70,7 +71,6 @@ class _GoogleMapsState extends State<GoogleMaps> {
     ).then((icon) {
       setState(() {
         customIcon = icon;
-        setMarkers();
       });
     });
   }
@@ -119,6 +119,14 @@ class _GoogleMapsState extends State<GoogleMaps> {
     });
   }
 
+  void _moveCameraToCurrentPosition() {
+    if (_mapController != null && currentPosition != null) {
+      _mapController!.animateCamera(
+        CameraUpdate.newLatLng(currentPosition!),
+      );
+    }
+  }
+
   final DraggableScrollableController _draggableController =
       DraggableScrollableController();
 
@@ -128,9 +136,13 @@ class _GoogleMapsState extends State<GoogleMaps> {
       body: Stack(
         children: [
           GoogleMap(
-            initialCameraPosition: CameraPosition(target: myLoc, zoom: 17),
+            initialCameraPosition:
+                CameraPosition(target: currentPosition ?? myLoc, zoom: 17),
             markers: markers,
-            onMapCreated: (GoogleMapController controller) {},
+            onMapCreated: (GoogleMapController controller) {
+              _mapController = controller;
+              _moveCameraToCurrentPosition();
+            },
             myLocationEnabled: true,
           ),
           Padding(
@@ -300,12 +312,12 @@ class _GoogleMapsState extends State<GoogleMaps> {
   Future<void> fetchLocationUpdates() async {
     bool serviceEnabled;
     PermissionStatus permissionGranted;
-
     serviceEnabled = await locationController.serviceEnabled();
-    if (!serviceEnabled) {
+    if (serviceEnabled) {
       serviceEnabled = await locationController.requestService();
+    } else {
+      return;
     }
-
     permissionGranted = await locationController.hasPermission();
     if (permissionGranted == PermissionStatus.denied) {
       permissionGranted = await locationController.requestPermission();
@@ -313,7 +325,6 @@ class _GoogleMapsState extends State<GoogleMaps> {
         return;
       }
     }
-
     locationController.onLocationChanged.listen((currentLocation) {
       if (currentLocation.latitude != null &&
           currentLocation.longitude != null) {
