@@ -7,7 +7,6 @@ import '../widgets/head.dart';
 
 class GoogleMaps extends StatefulWidget {
   const GoogleMaps({super.key});
-
   @override
   State<GoogleMaps> createState() => _GoogleMapsState();
 }
@@ -15,17 +14,15 @@ class GoogleMaps extends StatefulWidget {
 class _GoogleMapsState extends State<GoogleMaps> {
   final locationController = Location();
   final TextEditingController searchController = TextEditingController();
-
   LatLng myLoc = const LatLng(4.601947165813252, -74.06540188488111);
   LatLng? currentPosition;
   List<LatLng> positions = [];
   List<String> point = [];
   List<String> data = [];
-
+  List<String> filteredPoints = [];
   Set<Marker> markers = {};
   BitmapDescriptor customIcon = BitmapDescriptor.defaultMarker;
-
-  List<String> filteredPoints = [];
+  GoogleMapController? _mapController;
 
   @override
   void initState() {
@@ -74,19 +71,37 @@ class _GoogleMapsState extends State<GoogleMaps> {
     ).then((icon) {
       setState(() {
         customIcon = icon;
-        setMarkers();
       });
     });
   }
 
   void setMarkers() {
     markers.clear();
-    for (var position in positions) {
-      markers.add(Marker(
-        markerId: MarkerId(position.toString()),
-        position: position,
-        icon: customIcon,
-      ));
+    for (int i = 0; i < positions.length; i++) {
+      markers.add(
+        Marker(
+          markerId: MarkerId(positions[i].toString()),
+          position: positions[i],
+          icon: customIcon,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => GreenPoints(
+                  imagePath: "assets/canecaML.png",
+                  title: point[i],
+                  description: data[i],
+                  categories: const [
+                    'Disposables',
+                    'Non disposables',
+                    'Organic',
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      );
     }
   }
 
@@ -99,11 +114,21 @@ class _GoogleMapsState extends State<GoogleMaps> {
     } else {
       filteredList = point;
     }
-
     setState(() {
       filteredPoints = filteredList;
     });
   }
+
+  void _moveCameraToCurrentPosition() {
+    if (_mapController != null && currentPosition != null) {
+      _mapController!.animateCamera(
+        CameraUpdate.newLatLng(currentPosition!),
+      );
+    }
+  }
+
+  final DraggableScrollableController _draggableController =
+      DraggableScrollableController();
 
   @override
   Widget build(BuildContext context) {
@@ -111,17 +136,21 @@ class _GoogleMapsState extends State<GoogleMaps> {
       body: Stack(
         children: [
           GoogleMap(
-            initialCameraPosition: CameraPosition(target: myLoc, zoom: 17),
+            initialCameraPosition:
+                CameraPosition(target: currentPosition ?? myLoc, zoom: 17),
             markers: markers,
-            onMapCreated: (GoogleMapController controller) {},
+            onMapCreated: (GoogleMapController controller) {
+              _mapController = controller;
+              _moveCameraToCurrentPosition();
+            },
+            myLocationEnabled: true,
           ),
-          Positioned(
-            top: 0,  
-            left: 0,
-            right: 0,
+          Padding(
+            padding: const EdgeInsets.only(top: 30.0, left: 16.0, right: 16.0),
             child: HeaderWidget(),
           ),
           DraggableScrollableSheet(
+            controller: _draggableController,
             initialChildSize: 0.45,
             minChildSize: 0.4,
             maxChildSize: 0.6,
@@ -143,19 +172,26 @@ class _GoogleMapsState extends State<GoogleMaps> {
                 ),
                 child: Column(
                   children: [
-                    const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Column(
-                        children: [
-                          Icon(Icons.keyboard_arrow_up, color: Colors.green),
-                          Text(
-                            "Find collection points near you",
-                            style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black),
-                          ),
-                        ],
+                    GestureDetector(
+                      onTap: () {
+                        _draggableController.animateTo(1.0,
+                            duration: Duration(milliseconds: 300),
+                            curve: Curves.easeInOut);
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          children: [
+                            Icon(Icons.keyboard_arrow_up, color: Colors.green),
+                            Text(
+                              "Find collection points near you",
+                              style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     Padding(
@@ -209,7 +245,6 @@ class _GoogleMapsState extends State<GoogleMaps> {
                         itemBuilder: (context, index) {
                           String pointName = filteredPoints[index];
                           int originalIndex = point.indexOf(pointName);
-                          LatLng pos = positions[originalIndex];
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
                             child: ListTile(
@@ -270,19 +305,19 @@ class _GoogleMapsState extends State<GoogleMaps> {
           ),
         ],
       ),
-      bottomNavigationBar: BottomNavBar(currentIndex: 1), 
+      bottomNavigationBar: BottomNavBar(currentIndex: 1),
     );
   }
 
   Future<void> fetchLocationUpdates() async {
     bool serviceEnabled;
     PermissionStatus permissionGranted;
-
     serviceEnabled = await locationController.serviceEnabled();
-    if (!serviceEnabled) {
+    if (serviceEnabled) {
       serviceEnabled = await locationController.requestService();
+    } else {
+      return;
     }
-
     permissionGranted = await locationController.hasPermission();
     if (permissionGranted == PermissionStatus.denied) {
       permissionGranted = await locationController.requestPermission();
@@ -290,7 +325,6 @@ class _GoogleMapsState extends State<GoogleMaps> {
         return;
       }
     }
-
     locationController.onLocationChanged.listen((currentLocation) {
       if (currentLocation.latitude != null &&
           currentLocation.longitude != null) {
