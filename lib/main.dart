@@ -8,6 +8,8 @@ import 'package:camera/camera.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 
+
+
 const appScheme = 'flutter.sustainu';
 
 void main() async {

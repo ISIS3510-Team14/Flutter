@@ -83,7 +83,8 @@ Future<Map<String, dynamic>> getAnswer(String imagePath) async {
     'appropriateBin': appropriateBin,
     'icon': trashTypes
         .firstWhere((trash) => trash.type == foundTrashType,
-            orElse: () => TrashTypeIcon('No Item Detected', Icons.announcement_outlined))
+            orElse: () =>
+                TrashTypeIcon('No Item Detected', Icons.announcement_outlined))
         .icon,
   };
 }
@@ -105,7 +106,7 @@ class DisplayPictureScreen extends StatelessWidget {
     final trashType = result['foundTrashType'] ?? 'No Item Detected';
 
     // Registrar el evento en Firebase Analytics con el tiempo y el resultado
-    await logScanToFirestore((duration/1000).ceil(),trashType);
+    await logScanToFirestore((duration / 1000).ceil(), trashType);
 
     return result; // Devolver el resultado original
   }
