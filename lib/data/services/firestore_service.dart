@@ -13,4 +13,15 @@ class FirestoreService {
       await doc.reference.update({'count': currentCount + 1});
     }
   }
+
+  Future<void> incrementMapAccessCount(String pointName) async {
+    var collection = _db.collection('eventdb');
+    var snapshot =
+        await collection.where('name', isEqualTo: 'MapView').limit(1).get();
+    if (snapshot.docs.isNotEmpty) {
+      var doc = snapshot.docs.first;
+      int currentCount = doc['count'] as int;
+      await doc.reference.update({'count': currentCount + 1});
+    }
+  }
 }
