@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
+import 'package:sustain_u/data/models/loc_model.dart';
+import 'package:sustain_u/data/repositories/loc_repository.dart';
 import 'package:sustain_u/presentation/views/greenpoints.dart';
 import 'package:sustain_u/presentation/widgets/bottom_navbar.dart';
+import '../../data/services/firestore_service.dart';
 import '../widgets/head.dart';
 
 class GoogleMaps extends StatefulWidget {
@@ -16,50 +19,24 @@ class _GoogleMapsState extends State<GoogleMaps> {
   final TextEditingController searchController = TextEditingController();
   LatLng myLoc = const LatLng(4.601947165813252, -74.06540188488111);
   LatLng? currentPosition;
-  List<LatLng> positions = [];
-  List<String> point = [];
-  List<String> data = [];
-  List<String> filteredPoints = [];
   Set<Marker> markers = {};
   BitmapDescriptor customIcon = BitmapDescriptor.defaultMarker;
   GoogleMapController? _mapController;
+  final FirestoreService _firestoreService = FirestoreService();
+  final LocationPointRepository _repository = LocationPointRepository();
+  List<LocationPoint> points = [];
+  List<LocationPoint> filteredPoints = [];
 
   @override
   void initState() {
     super.initState();
-    initData();
+    points = _repository.getInitialPoints();
+    filteredPoints = points;
     customMarker();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await fetchLocationUpdates();
       setMarkers();
     });
-    filteredPoints = point;
-  }
-
-  Future<void> initData() async {
-    point.addAll([
-      'Mario Laserna',
-      'Carlos Pacheco Devia',
-      'El Bobo',
-      'Z',
-      'Santo Domingo'
-    ]);
-    data.addAll([
-      '6th Floor, next to the elevators ',
-      '3rd floor near the elevators',
-      'Between buildings C and B',
-      'In the food court',
-      'By the stairs'
-    ]);
-    positions.addAll(
-      [
-        const LatLng(4.602796139679612, -74.06469731690541),
-        const LatLng(4.602124935457818, -74.06501910977771),
-        const LatLng(4.601199293613709, -74.06537508662423),
-        const LatLng(4.602362693133353, -74.06544969672042),
-        const LatLng(4.604240151032256, -74.0659585186188)
-      ],
-    );
   }
 
   Future<void> customMarker() async {
@@ -77,20 +54,21 @@ class _GoogleMapsState extends State<GoogleMaps> {
 
   void setMarkers() {
     markers.clear();
-    for (int i = 0; i < positions.length; i++) {
+    for (final point in filteredPoints) {
       markers.add(
         Marker(
-          markerId: MarkerId(positions[i].toString()),
-          position: positions[i],
+          markerId: MarkerId(point.position.toString()),
+          position: point.position,
           icon: customIcon,
-          onTap: () {
+          onTap: () async {
+            await _firestoreService.incrementPointCount(point.name);
             Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => GreenPoints(
                   imagePath: "assets/canecaML.png",
-                  title: point[i],
-                  description: data[i],
+                  title: point.name,
+                  description: point.description,
                   categories: const [
                     'Disposables',
                     'Non disposables',
@@ -106,16 +84,8 @@ class _GoogleMapsState extends State<GoogleMaps> {
   }
 
   void _filterSearchResults(String query) {
-    List<String> filteredList = [];
-    if (query.isNotEmpty) {
-      filteredList = point
-          .where((p) => p.toLowerCase().contains(query.toLowerCase()))
-          .toList();
-    } else {
-      filteredList = point;
-    }
     setState(() {
-      filteredPoints = filteredList;
+      filteredPoints = query.isEmpty ? points : _repository.filterPoints(query);
     });
   }
 
@@ -152,7 +122,7 @@ class _GoogleMapsState extends State<GoogleMaps> {
           DraggableScrollableSheet(
             controller: _draggableController,
             initialChildSize: 0.45,
-            minChildSize: 0.4,
+            minChildSize: 0.3,
             maxChildSize: 0.6,
             builder: (context, scrollController) {
               return Container(
@@ -243,8 +213,7 @@ class _GoogleMapsState extends State<GoogleMaps> {
                         controller: scrollController,
                         itemCount: filteredPoints.length,
                         itemBuilder: (context, index) {
-                          String pointName = filteredPoints[index];
-                          int originalIndex = point.indexOf(pointName);
+                          final point = filteredPoints[index];
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
                             child: ListTile(
@@ -254,7 +223,7 @@ class _GoogleMapsState extends State<GoogleMaps> {
                                 height: 30,
                               ),
                               title: Text(
-                                pointName,
+                                point.name,
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -262,7 +231,7 @@ class _GoogleMapsState extends State<GoogleMaps> {
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(data[originalIndex]),
+                                  Text(point.description),
                                   const SizedBox(height: 5),
                                   GestureDetector(
                                     onTap: () {},
@@ -276,14 +245,16 @@ class _GoogleMapsState extends State<GoogleMaps> {
                                   ),
                                 ],
                               ),
-                              onTap: () {
+                              onTap: () async {
+                                await _firestoreService
+                                    .incrementPointCount(point.name);
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => GreenPoints(
                                       imagePath: "assets/canecaML.png",
-                                      title: point[originalIndex],
-                                      description: "5th floor - Near cafeteria",
+                                      title: point.name,
+                                      description: point.description,
                                       categories: const [
                                         'Disposables',
                                         'Non disposables',
