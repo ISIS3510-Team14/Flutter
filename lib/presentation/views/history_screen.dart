@@ -9,7 +9,7 @@ class HistoryScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: SustainUColors.background,
       
-      bottomNavigationBar: BottomNavBar(currentIndex: 3),
+      bottomNavigationBar: BottomNavBar(currentIndex: 0),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
