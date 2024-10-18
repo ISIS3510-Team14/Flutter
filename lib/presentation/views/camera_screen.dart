@@ -12,7 +12,6 @@ class CameraScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      //appBar: AppBar(title: const Text('Take a Picture')),
       body: Column(
         children: [
           SizedBox(height: 20),
