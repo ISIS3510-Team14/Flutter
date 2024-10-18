@@ -35,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SizedBox(height: 20),
             HeaderWidget(),
@@ -50,11 +50,12 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             SizedBox(height: 10),
+
             
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
-                color: Colors.grey.shade200,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Padding(
@@ -77,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       style: TextStyle(
                         fontFamily: 'Montserrat',
                         fontWeight: FontWeight.bold,
-                        fontSize: 32, 
+                        fontSize: 32,
                       ),
                     ),
                     Text(
@@ -92,36 +93,37 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             SizedBox(height: 10),
-            // Cards with white background
+
+         
             GridView.count(
               crossAxisCount: 2,
-              childAspectRatio: 1.5,
+              childAspectRatio: 1.2,
               mainAxisSpacing: 10,
               crossAxisSpacing: 10,
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
               children: [
-                _buildGridButton(
+                _buildFlatButton(
                   'See green points',
                   'https://raw.githubusercontent.com/ISIS3510-Team14/Data/master/logos/iconMap.svg',
                   SustainUColors.limeGreen,
                   '/map',
                 ),
-                _buildGridButton(
+                _buildFlatButton(
                   'See Scoreboard',
                   'https://raw.githubusercontent.com/ISIS3510-Team14/Data/master/logos/iconScoreboard.svg',
                   SustainUColors.limeGreen,
                   '/scoreboard',
                 ),
-                _buildGridButton(
+                _buildFlatButton(
                   'What can I recycle?',
                   'https://raw.githubusercontent.com/ISIS3510-Team14/Data/master/logos/iconRecycle.svg',
                   SustainUColors.limeGreen,
                   '/recycle',
                 ),
-                _buildGridButton(
+                _buildFlatButton(
                   'History',
-                  Icons.history,
+                  Icons.calendar_month, 
                   SustainUColors.limeGreen,
                   '/history',
                 ),
@@ -162,10 +164,10 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildGridButton(String label, dynamic icon, Color color, String route) {
-    return Card(
-      color: Colors.white, 
-      shape: RoundedRectangleBorder(
+  Widget _buildFlatButton(String label, dynamic icon, Color color, String route) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white, 
         borderRadius: BorderRadius.circular(16),
       ),
       child: InkWell(
@@ -174,23 +176,19 @@ class _HomeScreenState extends State<HomeScreen> {
         },
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Row(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  icon is String
-                      ? SvgPicture.network(
-                          icon,
-                          height: 40,
-                          colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
-                          placeholderBuilder: (context) => CircularProgressIndicator(),
-                        )
-                      : Icon(icon, color: color, size: 40),
-                  SizedBox(height: 10),
-                  Text(label, style: TextStyle(fontFamily: 'Montserrat')),
-                ],
-              ),
+              icon is String
+                  ? SvgPicture.network(
+                      icon,
+                      height: 40,
+                      colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+                      placeholderBuilder: (context) => CircularProgressIndicator(),
+                    )
+                  : Icon(icon, color: color, size: 40),
+              SizedBox(height: 10),
+              Text(label, style: TextStyle(fontFamily: 'Montserrat')),
             ],
           ),
         ),

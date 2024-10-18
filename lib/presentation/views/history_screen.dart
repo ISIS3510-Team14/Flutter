@@ -21,7 +21,7 @@ class HistoryScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.history, size: 80, color: SustainUColors.limeGreen),
+                  Icon(Icons.calendar_month, size: 80, color: SustainUColors.limeGreen),
                   SizedBox(height: 20),
                   Text(
                     'History View...',
