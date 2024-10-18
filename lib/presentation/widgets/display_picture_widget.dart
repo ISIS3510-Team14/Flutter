@@ -1,3 +1,4 @@
+import 'dart:async'; // For the timer
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'dart:typed_data';
@@ -9,10 +10,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 Future<void> logScanToFirestore(int durationSeconds, String trashType) async {
   try {
-    // Referencia a la colección 'scans' en Firestore
     CollectionReference scans = FirebaseFirestore.instance.collection('scans');
-
-    // Añadir un nuevo documento a la colección
     await scans.add({
       'time': durationSeconds,
       'trash_type': trashType,
@@ -89,26 +87,48 @@ Future<Map<String, dynamic>> getAnswer(String imagePath) async {
   };
 }
 
-class DisplayPictureScreen extends StatelessWidget {
+class DisplayPictureScreen extends StatefulWidget {
   final String imagePath;
 
   const DisplayPictureScreen({super.key, required this.imagePath});
 
+  @override
+  _DisplayPictureScreenState createState() => _DisplayPictureScreenState();
+}
+
+class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
+  int timerCount = 0; // Timer count in seconds
+  late Timer _timer; // Timer object
+  bool isTimerActive = false; // To track if the timer is running
+
+  @override
+  void initState() {
+    super.initState();
+    startTimer(); // Start the timer when the screen loads
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel(); // Cancel the timer when the widget is disposed
+    super.dispose();
+  }
+
+  // Function to start the timer
+  void startTimer() {
+    isTimerActive = true;
+    _timer = Timer.periodic(const Duration(seconds: 1), (Timer timer) {
+      if (mounted) {
+        setState(() {
+          timerCount += 1; // Increment the timer every second
+        });
+      }
+    });
+  }
+
   Future<Map<String, dynamic>> getAnswerWithTiming() async {
-    final startTime = DateTime.now(); // Empieza el conteo del tiempo
-
-    // Obtener la respuesta del análisis de la imagen
-    final result = await getAnswer(imagePath);
-
-    final duration = DateTime.now()
-        .difference(startTime)
-        .inMilliseconds; // Calcular la duración
-    final trashType = result['foundTrashType'] ?? 'No Item Detected';
-
-    // Registrar el evento en Firebase Analytics con el tiempo y el resultado
-    await logScanToFirestore((duration / 1000).ceil(), trashType);
-
-    return result; // Devolver el resultado original
+    final result = await getAnswer(widget.imagePath);
+    _timer.cancel(); // Stop the timer when the future is completed
+    return result; // Return the result
   }
 
   @override
@@ -117,15 +137,14 @@ class DisplayPictureScreen extends StatelessWidget {
       appBar: AppBar(title: const Text('Display the Picture')),
       body: Stack(
         children: [
-          Image.file(File(imagePath)),
+          Image.file(File(widget.imagePath)),
           Positioned(
             bottom: 20,
             left: 20,
             right: 20,
             child: Container(
               padding: const EdgeInsets.all(10),
-              width: MediaQuery.of(context).size.width *
-                  0.8, // 80% of the screen width
+              width: MediaQuery.of(context).size.width * 0.8,
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(10),
@@ -134,7 +153,7 @@ class DisplayPictureScreen extends StatelessWidget {
                 ],
               ),
               child: FutureBuilder<Map<String, dynamic>>(
-                future: getAnswerWithTiming(), // Call the async function here
+                future: getAnswerWithTiming(),
                 builder: (BuildContext context,
                     AsyncSnapshot<Map<String, dynamic>> snapshot) {
                   String title = snapshot.hasData &&
@@ -143,12 +162,14 @@ class DisplayPictureScreen extends StatelessWidget {
                       : 'No Item Detected';
 
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                      child: SizedBox(
-                        width: 50,
-                        height: 50,
-                        child:
-                            CircularProgressIndicator(), // Show loading indicator while waiting
+                    return Center(
+                      child: Text(
+                        'Time elapsed: $timerCount seconds',
+                        style: GoogleFonts.montserrat(
+                          color: Colors.black,
+                          fontSize: 18,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
                     );
                   } else if (snapshot.hasError) {
@@ -179,7 +200,7 @@ class DisplayPictureScreen extends StatelessWidget {
                             Icon(
                               data['icon'],
                               size: 60,
-                              color: const Color(0xFFB1CC33), // Icon color
+                              color: const Color(0xFFB1CC33),
                             ),
                             const SizedBox(width: 16),
                             Expanded(
