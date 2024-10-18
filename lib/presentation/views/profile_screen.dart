@@ -3,6 +3,42 @@ import '../../core/utils/sustainu_colors.dart';
 import '../../data/services/storage_service.dart';
 import 'package:auth0_flutter/auth0_flutter.dart';
 
+
+class UserProfile {
+  final String nickname;
+  final String email;
+  final String? profilePicture;
+
+  UserProfile({
+    required this.nickname,
+    required this.email,
+    this.profilePicture,
+  });
+}
+
+// ProfileFactory que crea el perfil
+abstract class ProfileFactory {
+  Future<UserProfile> createProfile();
+}
+
+// Implementación concreta de ProfileFactory para crear un perfil desde StorageService
+class StorageProfileFactory implements ProfileFactory {
+  final StorageService _storageService;
+
+  StorageProfileFactory(this._storageService);
+
+  @override
+  Future<UserProfile> createProfile() async {
+    Map<String, dynamic>? userProfile = await _storageService.getUserCredentials();
+
+    return UserProfile(
+      nickname: userProfile?['nickname'] ?? 'Unknown User',
+      email: userProfile?['email'] ?? 'Unknown Email',
+      profilePicture: userProfile?['picture'],
+    );
+  }
+}
+
 class ProfileScreen extends StatefulWidget {
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
@@ -15,24 +51,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     'wS0DhmlsFTG8UArvrikDn4q2sunD2J0p',
   );
 
-  String _nickname = 'Unknown User';
-  String _email = 'Unknown Email';
-  String? _profilePicture;
+  late Future<UserProfile> _userProfile;
 
   @override
   void initState() {
     super.initState();
-    _loadUserProfile();
-  }
-
-  Future<void> _loadUserProfile() async {
-    Map<String, dynamic>? userProfile = await _storageService.getUserCredentials();
-
-    setState(() {
-      _nickname = userProfile?['nickname'] ?? 'Unknown User';
-      _email = userProfile?['email'] ?? 'Unknown Email';
-      _profilePicture = userProfile?['picture'];
-    });
+    // Utilizando la fábrica para cargar el perfil
+    ProfileFactory profileFactory = StorageProfileFactory(_storageService);
+    _userProfile = profileFactory.createProfile();
   }
 
   Future<void> logoutAction(BuildContext context) async {
@@ -62,74 +88,84 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ),
       backgroundColor: SustainUColors.background,
-      body: Center( // Centra todo el contenido
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center, // Alinea todo en el centro verticalmente
-            crossAxisAlignment: CrossAxisAlignment.center, // Alinea todo en el centro horizontalmente
-            children: [
-              // Perfil centrado
-              CircleAvatar(
-                radius: 60,
-                backgroundColor: Colors.blue,
-                backgroundImage: _profilePicture != null && _profilePicture!.isNotEmpty
-                    ? NetworkImage(_profilePicture!)
-                    : null,
-                child: _profilePicture == null || _profilePicture!.isEmpty
-                    ? Icon(
-                        Icons.person,
-                        size: 60,
+      body: FutureBuilder<UserProfile>(
+        future: _userProfile,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error loading profile'));
+          } else if (!snapshot.hasData) {
+            return Center(child: Text('No profile data'));
+          }
+
+          final userProfile = snapshot.data!;
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  CircleAvatar(
+                    radius: 60,
+                    backgroundColor: Colors.blue,
+                    backgroundImage: userProfile.profilePicture != null && userProfile.profilePicture!.isNotEmpty
+                        ? NetworkImage(userProfile.profilePicture!)
+                        : null,
+                    child: userProfile.profilePicture == null || userProfile.profilePicture!.isEmpty
+                        ? Icon(
+                            Icons.person,
+                            size: 60,
+                            color: Colors.white,
+                          )
+                        : null,
+                  ),
+                  SizedBox(height: 20),
+                  Text(
+                    'Nickname: ${userProfile.nickname}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 28,
+                      color: SustainUColors.text,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    'Email: ${userProfile.email}',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: SustainUColors.textLight,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 40),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      logoutAction(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: SustainUColors.coralOrange,
+                      padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                    icon: Icon(Icons.exit_to_app, size: 28, color: Colors.white),
+                    label: Text(
+                      'Logout',
+                      style: TextStyle(
+                        fontSize: 20,
                         color: Colors.white,
-                      )
-                    : null,
-              ),
-              SizedBox(height: 20),
-              // Nombre en negrilla grande
-              Text(
-                'Nickname: $_nickname',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 28,
-                  color: SustainUColors.text,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 10),
-              // Email más pequeño y no en negrilla
-              Text(
-                'Email: $_email',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: SustainUColors.textLight,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 40),
-              // Botón de Logout grande, redondo, con ícono
-              ElevatedButton.icon(
-                onPressed: () {
-                  logoutAction(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: SustainUColors.coralOrange, // Color coralOrange
-                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30), // Botón redondeado
+                      ),
+                    ),
                   ),
-                ),
-                icon: Icon(Icons.exit_to_app, size: 28, color: Colors.white),
-                label: Text(
-                  'Logout',
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.white,
-                  ),
-                ),
+                ],
               ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }

@@ -93,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             SizedBox(height: 10),
 
-         
+            // GridView to display buttons with local SVG assets
             GridView.count(
               crossAxisCount: 2,
               childAspectRatio: 1.2,
@@ -104,19 +104,19 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 _buildFlatButton(
                   'See green points',
-                  'https://raw.githubusercontent.com/ISIS3510-Team14/Data/master/logos/iconMap.svg',
+                  'assets/iconMap.svg',
                   SustainUColors.limeGreen,
                   '/map',
                 ),
                 _buildFlatButton(
                   'See Scoreboard',
-                  'https://raw.githubusercontent.com/ISIS3510-Team14/Data/master/logos/iconScoreboard.svg',
+                  'assets/iconScoreboard.svg',
                   SustainUColors.limeGreen,
                   '/scoreboard',
                 ),
                 _buildFlatButton(
                   'What can I recycle?',
-                  'https://raw.githubusercontent.com/ISIS3510-Team14/Data/master/logos/iconRecycle.svg',
+                  'assets/iconRecycle.svg',
                   SustainUColors.limeGreen,
                   '/recycle',
                 ),
@@ -179,11 +179,10 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               icon is String
-                  ? SvgPicture.network(
+                  ? SvgPicture.asset( // Carga el archivo desde assets
                       icon,
                       height: 40,
                       colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
-                      placeholderBuilder: (context) => CircularProgressIndicator(),
                     )
                   : Icon(icon, color: color, size: 40),
               SizedBox(height: 10),

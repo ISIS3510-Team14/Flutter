@@ -14,8 +14,8 @@ class HeaderWidget extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Image.network(
-          'https://raw.githubusercontent.com/ISIS3510-Team14/Data/master/logo.png',
+        Image.asset( 
+          'assets/logo (1).png', 
           height: 50,
         ),
         FutureBuilder<String?>(
