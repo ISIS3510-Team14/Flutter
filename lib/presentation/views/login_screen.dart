@@ -86,14 +86,14 @@ class _LoginScreenState extends State<LoginScreen> {
             : Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.network(
-                    'https://raw.githubusercontent.com/ISIS3510-Team14/Data/master/img.png',
+                  Image.asset(
+                    'assets/img.png',
                     height: 250,
                     width: 250,
                   ),
                   SizedBox(height: 10),
-                  Image.network(
-                    'https://raw.githubusercontent.com/ISIS3510-Team14/Data/master/logo.png',
+                  Image.asset(
+                    'assets/logo.png',
                     height: 130,
                     width: 130,
                   ),
