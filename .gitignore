@@ -45,7 +45,7 @@ app.*.map.json
 /android/app/src/main/AndroidManifest.xml
 /pubspec.lock
 #Ignore api key
-/lib/services/openai/api_key.dart
+lib/data/services/openai/api_key.dart
 
 pubspec.lock
 android/app/google-services.json

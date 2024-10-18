@@ -138,7 +138,7 @@ class DisplayPictureScreen extends StatelessWidget {
                 builder: (BuildContext context,
                     AsyncSnapshot<Map<String, dynamic>> snapshot) {
                   String title = snapshot.hasData &&
-                          snapshot.data!['foundTrashType'].isNotEmpty
+                          snapshot.data!['foundTrashType'] != 'No Item Detected'
                       ? 'Item Detected!'
                       : 'No Item Detected';
 

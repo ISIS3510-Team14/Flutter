@@ -75,6 +75,10 @@ flutter:
   assets:
   - assets/
   - assets/su.png
+  - assets/iconMap.svg
+  - assets/iconScoreboard.svg
+  - assets/iconRecycle.svg
+  - assets/logo (1).png
     #-ic_pick.png
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
