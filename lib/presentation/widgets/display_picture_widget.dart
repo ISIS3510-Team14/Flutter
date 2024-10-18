@@ -165,7 +165,7 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Center(
                       child: Text(
-                        'Time elapsed: $timerCount seconds',
+                        'Identifying waste: $timerCount seconds elapsed',
                         style: GoogleFonts.montserrat(
                           color: Colors.black,
                           fontSize: 18,
