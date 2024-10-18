@@ -8,20 +8,24 @@ class HistoryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: SustainUColors.background,
-      
       bottomNavigationBar: BottomNavBar(currentIndex: 0),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            HeaderWidget(),
+            Padding(
+              padding:
+                  const EdgeInsets.only(top: 30.0, left: 16.0, right: 16.0),
+              child: HeaderWidget(),
+            ),
             SizedBox(height: 20),
             Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.calendar_month, size: 80, color: SustainUColors.limeGreen),
+                  Icon(Icons.calendar_month,
+                      size: 80, color: SustainUColors.limeGreen),
                   SizedBox(height: 20),
                   Text(
                     'History View...',

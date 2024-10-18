@@ -64,6 +64,7 @@ Future<Map<String, dynamic>> getAnswer(String imagePath) async {
   openaiAnswer = await ChatService().request(
       "Answer for the image: Which of these types of trash is the user taking the picture holding?: $trashString. Answer only with the type",
       imageBase64);
+  print(openaiAnswer);
 
   for (TrashTypeIcon trash in trashTypes) {
     if (openaiAnswer!.toLowerCase().contains(trash.type.toLowerCase())) {
