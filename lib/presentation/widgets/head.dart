@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import '../../data/services/storage_service.dart'; 
+import '../../data/services/storage_service.dart';
 
 class HeaderWidget extends StatelessWidget {
   final StorageService _storageService = StorageService();
 
   Future<String?> _loadUserProfilePicture() async {
-    Map<String, dynamic>? credentials = await _storageService.getUserCredentials();
-    return credentials?['picture']; 
+    Map<String, dynamic>? credentials =
+        await _storageService.getUserCredentials();
+    return credentials?['picture'];
   }
 
   @override
@@ -14,8 +15,8 @@ class HeaderWidget extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Image.asset( 
-          'assets/logo (1).png', 
+        Image.asset(
+          'assets/logo (1).png',
           height: 50,
         ),
         FutureBuilder<String?>(
@@ -36,7 +37,9 @@ class HeaderWidget extends StatelessWidget {
                   ),
                 ),
               );
-            } else if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+            } else if (snapshot.hasError ||
+                !snapshot.hasData ||
+                snapshot.data!.isEmpty) {
               return GestureDetector(
                 onTap: () {
                   Navigator.pushNamed(context, '/profile');
@@ -45,7 +48,7 @@ class HeaderWidget extends StatelessWidget {
                   radius: 24,
                   backgroundColor: Colors.blue,
                   child: Icon(
-                    Icons.person, 
+                    Icons.person,
                     size: 30,
                     color: Colors.white,
                   ),
@@ -54,11 +57,11 @@ class HeaderWidget extends StatelessWidget {
             } else {
               return GestureDetector(
                 onTap: () {
-                  Navigator.pushNamed(context, '/profile'); 
+                  Navigator.pushNamed(context, '/profile');
                 },
                 child: CircleAvatar(
                   radius: 24,
-                  backgroundImage: NetworkImage(snapshot.data!), 
+                  backgroundImage: NetworkImage(snapshot.data!),
                 ),
               );
             }
