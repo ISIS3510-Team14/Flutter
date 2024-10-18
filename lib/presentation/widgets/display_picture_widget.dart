@@ -97,18 +97,64 @@ class DisplayPictureScreen extends StatelessWidget {
   Future<Map<String, dynamic>> getAnswerWithTiming() async {
     final startTime = DateTime.now(); // Empieza el conteo del tiempo
 
-    // Obtener la respuesta del análisis de la imagen
+    // Show the loading popup with elapsed time
+    _showLoadingPopup(context, startTime);
+
+    // Obtain the answer from getAnswer
     final result = await getAnswer(imagePath);
 
-    final duration = DateTime.now()
-        .difference(startTime)
-        .inMilliseconds; // Calcular la duración
+    // Calculate the duration
+    final duration = DateTime.now().difference(startTime).inMilliseconds;
     final trashType = result['foundTrashType'] ?? 'No Item Detected';
 
-    // Registrar el evento en Firebase Analytics con el tiempo y el resultado
+    // Log the scan to Firestore
     await logScanToFirestore((duration / 1000).ceil(), trashType);
 
+    // Close the popup when the task is completed
+    Navigator.of(context).pop();
+
     return result; // Devolver el resultado original
+  }
+
+  void _showLoadingPopup(BuildContext context, DateTime startTime) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            Timer.periodic(const Duration(seconds: 1), (Timer timer) {
+              setState(() {
+                // Refresh the dialog to update elapsed time
+              });
+            });
+
+            return AlertDialog(
+              content: StreamBuilder<int>(
+                stream: Stream.periodic(const Duration(seconds: 1), (i) {
+                  final elapsed = DateTime.now().difference(startTime).inSeconds;
+                  return elapsed;
+                }),
+                builder: (context, snapshot) {
+                  final elapsed = snapshot.data ?? 0;
+                  return Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const CircularProgressIndicator(),
+                      const SizedBox(width: 16),
+                      Text(
+                        'Waiting... ${elapsed}s elapsed',
+                        style: GoogleFonts.montserrat(fontSize: 16),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   @override
