@@ -129,6 +129,16 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
   Future<Map<String, dynamic>> getAnswerWithTiming() async {
     final result = await getAnswer(widget.imagePath);
     _timer.cancel(); // Stop the timer when the future is completed
+
+    final startTime = DateTime.now(); // Empieza el conteo del tiempo
+
+    final duration = DateTime.now()
+        .difference(startTime)
+        .inMilliseconds; // Calcular la duración
+    final trashType = result['foundTrashType'] ?? 'No Item Detected';
+
+    // Registrar el evento en Firebase Analytics con el tiempo y el resultado
+    await logScanToFirestore((duration / 1000).ceil(), trashType);
     return result; // Return the result
   }
 
