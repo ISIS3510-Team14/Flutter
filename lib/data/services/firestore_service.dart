@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:sustain_u/data/models/loc_model.dart';
 
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -22,6 +24,27 @@ class FirestoreService {
       var doc = snapshot.docs.first;
       int currentCount = doc['count'] as int;
       await doc.reference.update({'count': currentCount + 1});
+    }
+  }
+
+  Future<List<LocationPoint>> fetchLocationPoints() async {
+    try {
+      final snapshot = await _db.collection('locationdb').get();
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        final geoPoint = data['loc'] as GeoPoint;
+
+        return LocationPoint(
+          name: data['name'] ?? '',
+          description: data['info1'] ?? '',
+          info: data['info2'] ?? '',
+          position: LatLng(geoPoint.latitude, geoPoint.longitude),
+          imgUrl: data['img'] ?? '',
+        );
+      }).toList();
+    } catch (e) {
+      print('Error fetching location points: $e');
+      return [];
     }
   }
 }

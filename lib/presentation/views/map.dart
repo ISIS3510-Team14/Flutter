@@ -30,11 +30,20 @@ class _GoogleMapsState extends State<GoogleMaps> {
   @override
   void initState() {
     super.initState();
-    points = _repository.getInitialPoints();
-    filteredPoints = points;
     customMarker();
+    fetchInitialLocationPoints();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await fetchLocationUpdates();
+      setMarkers();
+    });
+  }
+
+  Future<void> fetchInitialLocationPoints() async {
+    final pointsList = await _repository.getInitialPoints();
+
+    setState(() {
+      points = pointsList;
+      filteredPoints = points;
       setMarkers();
     });
   }
@@ -66,7 +75,7 @@ class _GoogleMapsState extends State<GoogleMaps> {
               context,
               MaterialPageRoute(
                 builder: (context) => GreenPoints(
-                  imagePath: "assets/canecaML.png",
+                  imagePath: point.imgUrl,
                   title: point.name,
                   description: point.description,
                   categories: const [
@@ -85,7 +94,8 @@ class _GoogleMapsState extends State<GoogleMaps> {
 
   void _filterSearchResults(String query) {
     setState(() {
-      filteredPoints = query.isEmpty ? points : _repository.filterPoints(query);
+      filteredPoints =
+          query.isEmpty ? points : _repository.filterPoints(points, query);
     });
   }
 
