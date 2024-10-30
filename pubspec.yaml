@@ -50,6 +50,7 @@ dependencies:
   dart_jsonwebtoken: ^2.14.1
   googleapis: ^13.2.0
   cloud_firestore: ^4.17.5
+  connectivity_plus: ^3.0.3
 
 dev_dependencies:
   flutter_test:
@@ -81,6 +82,10 @@ flutter:
   - assets/logo (1).png
   - assets/logo.png
   - assets/img.png
+  - assets/glass.png
+  - assets/paper.png
+  - assets/metal.png
+  - assets/plastic.png
     #-ic_pick.png
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

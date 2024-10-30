@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:auth0_flutter/auth0_flutter.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';  
+import 'package:connectivity_plus/connectivity_plus.dart'; // New import for connectivity
 import '../../core/utils/sustainu_colors.dart';
 import '../../data/services/storage_service.dart';
 
@@ -13,6 +14,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
+  bool _isConnected = true; // To track internet connection status
   String _errorMessage = '';
   late Auth0 auth0;
   final StorageService _storageService = StorageService();
@@ -25,6 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
       'wS0DhmlsFTG8UArvrikDn4q2sunD2J0p',
     );
     _checkIfLoggedIn();
+    _checkInternetConnection(); // Check the connection on app start
   }
 
   Future<void> _checkIfLoggedIn() async {
@@ -33,6 +36,15 @@ class _LoginScreenState extends State<LoginScreen> {
     if (storedCredentials != null) {
       Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
     }
+  }
+
+  Future<void> _checkInternetConnection() async {
+    var connectivityResult = await Connectivity().checkConnectivity();
+    bool connected = connectivityResult == ConnectivityResult.mobile || connectivityResult == ConnectivityResult.wifi;
+    
+    setState(() {
+      _isConnected = connected;
+    });
   }
 
   Future<void> authenticate() async {
@@ -104,13 +116,50 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   SizedBox(height: 30),
                   ElevatedButton(
-                    onPressed: authenticate,
+                    onPressed: _isConnected ? authenticate : null,
                     child: Text('Log in / Sign up', style: TextStyle(color: Colors.white)),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFFB1CC33),
+                      backgroundColor: _isConnected ? Color(0xFFB1CC33) : Colors.grey,
                       minimumSize: Size(220, 60),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15.0),
+                      ),
+                    ),
+                  ),
+                  if (!_isConnected) ...[
+                    SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: _checkInternetConnection,
+                      child: Text('Retry', style: TextStyle(color: Colors.white)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange,
+                        minimumSize: Size(220, 60),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15.0),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      'No Internet Connection',
+                      style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                  SizedBox(height: 30),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pushNamed(
+                        context,
+                        '/instructions'
+                      );
+                    },
+                    child: Text(
+                      'Instructions',
+                      style: TextStyle(
+                        fontFamily: 'Montserrat',
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: SustainUColors.text,
                       ),
                     ),
                   ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:connectivity_plus/connectivity_plus.dart'; // Importing connectivity package
 import '../../core/utils/sustainu_colors.dart';
 import '../widgets/head.dart';
 import '../widgets/bottom_navbar.dart';
@@ -13,10 +14,17 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   String _name = 'User';
   final StorageService _storageService = StorageService();
+  bool _isConnected = true; // Track internet connection status
+  late Connectivity _connectivity;
 
   @override
   void initState() {
     super.initState();
+    _connectivity = Connectivity();
+    _checkInternetConnection();
+    _connectivity.onConnectivityChanged.listen((ConnectivityResult result) {
+      _updateConnectionStatus(result);
+    });
     _loadUserProfile();
   }
 
@@ -25,6 +33,45 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _name = credentials?['nickname'] ?? 'User';
     });
+  }
+
+  Future<void> _checkInternetConnection() async {
+    var connectivityResult = await Connectivity().checkConnectivity();
+    _updateConnectionStatus(connectivityResult);
+  }
+
+  void _updateConnectionStatus(ConnectivityResult result) {
+    bool connected = result == ConnectivityResult.mobile || result == ConnectivityResult.wifi;
+
+    if (!connected && _isConnected) {
+      _showNoInternetDialog(); // Show dialog if connection is lost
+    }
+
+    setState(() {
+      _isConnected = connected;
+    });
+  }
+
+  void _showNoInternetDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('No Internet Connection'),
+          content: Text('Please check your internet connection and try again.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _checkInternetConnection(); 
+              },
+              child: Text('Retry'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -50,7 +97,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             SizedBox(height: 10),
-            
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
@@ -92,8 +138,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             SizedBox(height: 10),
-
-            // GridView to display buttons with local SVG assets
             GridView.count(
               crossAxisCount: 2,
               childAspectRatio: 1.2,
@@ -122,7 +166,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 _buildFlatButton(
                   'History',
-                  Icons.calendar_month, 
+                  Icons.calendar_month,
                   SustainUColors.limeGreen,
                   '/history',
                 ),
@@ -166,7 +210,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildFlatButton(String label, dynamic icon, Color color, String route) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white, 
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
       ),
       child: InkWell(
@@ -179,7 +223,7 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               icon is String
-                  ? SvgPicture.asset( // Carga el archivo desde assets
+                  ? SvgPicture.asset(
                       icon,
                       height: 40,
                       colorFilter: ColorFilter.mode(color, BlendMode.srcIn),

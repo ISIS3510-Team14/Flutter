@@ -9,6 +9,7 @@ import '../../presentation/views/login_screen.dart';
 import '../../presentation/views/sign_in_screen.dart';
 import '../../presentation/views/camera_screen.dart';
 import 'package:camera/camera.dart';
+import 'package:sustain_u/presentation/views/instructions_screen.dart';
 
 class AppRoutes {
   static Map<String, WidgetBuilder> routes(CameraDescription camera){
@@ -22,6 +23,7 @@ class AppRoutes {
     '/recycle': (context) => RecycleScreen(),
     '/scoreboard': (context) => ScoreboardScreen(),
     '/history': (context) => HistoryScreen(),
+    '/instructions': (context) => InstructionsScreen(),
     };
   }
 }
