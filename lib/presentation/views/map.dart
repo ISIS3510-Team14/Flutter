@@ -26,6 +26,7 @@ class _GoogleMapsState extends State<GoogleMaps> {
   final LocationPointRepository _repository = LocationPointRepository();
   List<LocationPoint> points = [];
   List<LocationPoint> filteredPoints = [];
+  bool isNavigating = false;
 
   @override
   void initState() {
@@ -54,16 +55,8 @@ class _GoogleMapsState extends State<GoogleMaps> {
   }
 
   Future<void> customMarker() async {
-    BitmapDescriptor.asset(
-      const ImageConfiguration(),
-      "assets/ic_pick.png",
-      width: 40,
-      height: 40,
-    ).then((icon) {
-      setState(() {
-        customIcon = icon;
-      });
-    });
+    customIcon = await BitmapDescriptor.asset(
+        ImageConfiguration(size: Size(40, 40)), "assets/ic_pick.png");
   }
 
   void setMarkers() {
@@ -71,28 +64,32 @@ class _GoogleMapsState extends State<GoogleMaps> {
     for (final point in filteredPoints) {
       markers.add(
         Marker(
-          markerId: MarkerId(point.position.toString()),
-          position: point.position,
-          icon: customIcon,
-          onTap: () async {
-            await _firestoreService.incrementPointCount(point.name);
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => GreenPoints(
-                  imagePath: point.imgUrl,
-                  title: point.name,
-                  description: point.description,
-                  categories: const [
-                    'Disposables',
-                    'Non disposables',
-                    'Organic',
-                  ],
+            markerId: MarkerId(point.position.toString()),
+            position: point.position,
+            icon: customIcon,
+            onTap: () async {
+              if (isNavigating) return;
+              isNavigating = true;
+              await _firestoreService.incrementPointCount(point.name);
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => GreenPoints(
+                    imagePath: point.imgUrl,
+                    title: point.name,
+                    description: point.description,
+                    categories: const [
+                      'Disposables',
+                      'Non disposables',
+                      'Organic',
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
-        ),
+              );
+              setState(() {
+                isNavigating = false;
+              });
+            }),
       );
     }
   }
@@ -261,23 +258,28 @@ class _GoogleMapsState extends State<GoogleMaps> {
                                 ],
                               ),
                               onTap: () async {
+                                if (isNavigating) return;
+                                isNavigating = true;
                                 await _firestoreService
                                     .incrementPointCount(point.name);
-                                Navigator.push(
+                                await Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => GreenPoints(
-                                      imagePath: "assets/canecaML.png",
+                                      imagePath: point.imgUrl,
                                       title: point.name,
                                       description: point.description,
                                       categories: const [
                                         'Disposables',
                                         'Non disposables',
-                                        'Organic'
+                                        'Organic',
                                       ],
                                     ),
                                   ),
                                 );
+                                setState(() {
+                                  isNavigating = false;
+                                });
                               },
                             ),
                           );
