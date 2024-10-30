@@ -39,7 +39,12 @@ class _GoogleMapsState extends State<GoogleMaps> {
   }
 
   Future<void> fetchInitialLocationPoints() async {
-    final pointsList = await _repository.getInitialPoints();
+    if (currentPosition == null) {
+      await _repository.getInitialPoints(myLoc);
+      return;
+    }
+
+    final pointsList = await _repository.getInitialPoints(currentPosition!);
 
     setState(() {
       points = pointsList;
@@ -314,6 +319,7 @@ class _GoogleMapsState extends State<GoogleMaps> {
             currentLocation.latitude!,
             currentLocation.longitude!,
           );
+          fetchInitialLocationPoints();
         });
       }
     });
