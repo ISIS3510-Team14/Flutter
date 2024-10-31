@@ -50,6 +50,7 @@ dependencies:
   dart_jsonwebtoken: ^2.14.1
   googleapis: ^13.2.0
   cloud_firestore: ^4.17.5
+  internet_connection_checker_plus: ^2.5.2
 
 dev_dependencies:
   flutter_test:

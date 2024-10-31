@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'display_picture_widget.dart'; 
-
+import 'display_picture_widget.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class CameraWidget extends StatefulWidget {
   final CameraDescription camera;
@@ -35,7 +36,6 @@ class CameraWidgetState extends State<CameraWidget> {
 
   @override
   Widget build(BuildContext context) {
-
     return FutureBuilder<void>(
       future: _initializeControllerFuture,
       builder: (context, snapshot) {
@@ -58,16 +58,75 @@ class CameraWidgetState extends State<CameraWidget> {
                     backgroundColor: Colors.white,
                     onPressed: () async {
                       try {
-                        await _initializeControllerFuture;
-                        final image = await _controller.takePicture();
-                        if (!context.mounted) return;
-                        await Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => DisplayPictureScreen(
-                              imagePath: image.path
+                        bool result =
+                            await InternetConnection().hasInternetAccess;
+                        if (!result) {
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return AlertDialog(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                title: Text(
+                                  'No Internet Connection',
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                content: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.wifi_off,
+                                      size: 60,
+                                      color: const Color(0xFFB1CC33),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: Text(
+                                        'Please check your connection and try again.',
+                                        style: GoogleFonts.montserrat(
+                                          color: Colors.black54,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        textAlign: TextAlign.left,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                actions: [
+                                  Center(
+                                    child: TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: Text(
+                                        'OK',
+                                        style: GoogleFonts.montserrat(
+                                          color: Colors.black,
+                                          fontSize: 18,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        } else {
+                          await _initializeControllerFuture;
+                          final image = await _controller.takePicture();
+                          if (!context.mounted) return;
+                          await Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  DisplayPictureScreen(imagePath: image.path),
                             ),
-                          ),
-                        );
+                          );
+                        }
                       } catch (e) {
                         print(e);
                       }
