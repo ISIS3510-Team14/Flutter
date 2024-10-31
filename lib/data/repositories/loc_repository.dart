@@ -7,7 +7,15 @@ class LocationPointRepository {
   final FirestoreService _firestoreService = FirestoreService();
 
   Future<List<LocationPoint>> getInitialPoints(LatLng myLoc) async {
-    List<LocationPoint> points = await _firestoreService.fetchLocationPoints();
+    List<LocationPoint> points;
+
+    points = await _firestoreService.fetchLocationPoints();
+
+    if (points.isEmpty) {
+      print("POINTS NOT IN CACHE");
+      points = await _firestoreService.fetchLocationPointsFromServer();
+    }
+
     return _sortPointsByDistance(points, myLoc);
   }
 

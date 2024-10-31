@@ -51,6 +51,7 @@ dependencies:
   googleapis: ^13.2.0
   cloud_firestore: ^4.17.5
   geolocator: ^9.0.1
+  connectivity_plus: ^6.1.0
 
 dev_dependencies:
   flutter_test:

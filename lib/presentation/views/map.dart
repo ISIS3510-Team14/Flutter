@@ -114,18 +114,23 @@ class _GoogleMapsState extends State<GoogleMaps> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       body: Stack(
         children: [
-          GoogleMap(
-            initialCameraPosition:
-                CameraPosition(target: currentPosition ?? myLoc, zoom: 17),
-            markers: markers,
-            onMapCreated: (GoogleMapController controller) {
-              _mapController = controller;
-              _moveCameraToCurrentPosition();
-            },
-            myLocationEnabled: true,
+          SizedBox(
+            height: screenHeight * 0.65,
+            child: GoogleMap(
+              initialCameraPosition:
+                  CameraPosition(target: currentPosition ?? myLoc, zoom: 16),
+              markers: markers,
+              onMapCreated: (GoogleMapController controller) {
+                _mapController = controller;
+                _moveCameraToCurrentPosition();
+              },
+              myLocationEnabled: true,
+            ),
           ),
           Padding(
             padding: const EdgeInsets.only(top: 30.0, left: 16.0, right: 16.0),
