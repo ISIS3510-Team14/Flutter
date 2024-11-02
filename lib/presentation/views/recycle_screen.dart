@@ -9,66 +9,77 @@ class RecycleScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: SustainUColors.background,
       bottomNavigationBar: BottomNavBar(currentIndex: 3),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: SingleChildScrollView( // Added to prevent overflow
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 30.0, left: 0.0, right: 0.0),
-                child: HeaderWidget(),
-              ),
-              SizedBox(height: 20),
-              Text(
-                'Residues:',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: SustainUColors.text,
-                ),
-              ),
-              SizedBox(height: 16),
-              GridView.count(
-                crossAxisCount: 2,
-                childAspectRatio: 1.3,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildCategoryButton(
-                    context,
-                    'Paper',
-                    'assets/paper.png',
-                    'Boxes, magazines, notepads',
-                    '/paper',
+                  HeaderWidget(),
+                  SizedBox(height: 20),
+                  Text(
+                    'Residues:',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: SustainUColors.text,
+                    ),
                   ),
-                  _buildCategoryButton(
-                    context,
-                    'Plastic',
-                    'assets/plastic.png',
-                    'Packages, PET, bottles',
-                    '/plastic',
-                  ),
-                  _buildCategoryButton(
-                    context,
-                    'Glass',
-                    'assets/glass.png',
-                    'Bottles, containers',
-                    '/glass',
-                  ),
-                  _buildCategoryButton(
-                    context,
-                    'Metal',
-                    'assets/metal.png',
-                    'Cans, utensils',
-                    '/metal',
+                  SizedBox(height: 20),
+                  Expanded(
+                    child: GridView.builder(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                        childAspectRatio: 1.2,
+                      ),
+                      itemCount: 4,
+                      itemBuilder: (context, index) {
+                        final categories = [
+                          {
+                            'label': 'Paper',
+                            'icon': 'assets/paper.png',
+                            'subLabel': 'Boxes, magazines, notepads',
+                            'route': '/paper'
+                          },
+                          {
+                            'label': 'Plastic',
+                            'icon': 'assets/plastic.png',
+                            'subLabel': 'Packages, PET, bottles',
+                            'route': '/plastic'
+                          },
+                          {
+                            'label': 'Glass',
+                            'icon': 'assets/glass.png',
+                            'subLabel': 'Bottles, containers',
+                            'route': '/glass'
+                          },
+                          {
+                            'label': 'Metal',
+                            'icon': 'assets/metal.png',
+                            'subLabel': 'Cans, utensils',
+                            'route': '/metal'
+                          },
+                        ];
+
+                        return _buildCategoryButton(
+                          context,
+                          categories[index]['label']!,
+                          categories[index]['icon']!,
+                          categories[index]['subLabel']!,
+                          categories[index]['route']!,
+                        );
+                      },
+                    ),
                   ),
                 ],
               ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
@@ -86,21 +97,23 @@ class RecycleScreen extends StatelessWidget {
         Navigator.pushNamed(context, route);
       },
       style: ElevatedButton.styleFrom(
-        elevation: 2, backgroundColor: Colors.white, 
+        elevation: 2,
+        backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(12.0), 
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
               icon,
               height: 50,
+              fit: BoxFit.cover, 
             ),
-            SizedBox(height: 10),
+            SizedBox(height: 8), 
             Text(
               label,
               style: TextStyle(

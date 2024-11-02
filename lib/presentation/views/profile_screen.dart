@@ -202,7 +202,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     SizedBox(height: 10),
                     Text(
-                      'No Internet Connection',
+                      'No Internet Connection, To Logout Please Connect To Inernet',
                       style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
                     ),
                   ],
