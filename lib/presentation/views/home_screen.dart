@@ -53,32 +53,9 @@ class _HomeScreenState extends State<HomeScreen> {
       } else {
         _showNoImagesDialog(); // Show popup if no images are found
       }
-    } else {
-      // Optionally, show a dialog indicating no internet access
-      _showNoInternetDialog();
     }
 
     return images; // Return the loaded images
-  }
-
-  void _showNoInternetDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('No Internet Connection'),
-          content: Text('Please check your internet connection.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   void _showNoImagesDialog() {
