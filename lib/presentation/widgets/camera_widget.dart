@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'display_picture_widget.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../core/utils/sustainu_colors.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 
 class CameraWidget extends StatefulWidget {
   final CameraDescription camera;
@@ -77,42 +80,140 @@ class CameraWidgetState extends State<CameraWidget> {
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
-                                content: Row(
+                                content: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(
-                                      Icons.wifi_off,
-                                      size: 60,
-                                      color: const Color(0xFFB1CC33),
-                                    ),
-                                    const SizedBox(width: 16),
-                                    Expanded(
-                                      child: Text(
-                                        'Please check your connection and try again.',
-                                        style: GoogleFonts.montserrat(
-                                          color: Colors.black54,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                        textAlign: TextAlign.left,
+                                    Text(
+                                      'Please check your connection and try again.',
+                                      style: GoogleFonts.montserrat(
+                                        color: Colors.black54,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
                                       ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      'What would you like to do?',
+                                      style: GoogleFonts.montserrat(
+                                        color: Colors.black,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.normal,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    const SizedBox(height: 20),
+                                    Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Center(
+                                          child: TextButton(
+                                            onPressed: () {
+                                              Navigator.pushNamed(
+                                                  context, '/recycle');
+                                            },
+                                            style: TextButton.styleFrom(
+                                              backgroundColor:
+                                                  SustainUColors.limeGreen,
+                                              minimumSize: const Size(200, 50),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                              ),
+                                            ),
+                                            child: Text(
+                                              'Review Recycling Tips',
+                                              style: GoogleFonts.montserrat(
+                                                color: Colors.white,
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 10),
+                                        Center(
+                                          child: TextButton(
+                                            onPressed: () async {
+                                              try {
+                                                await _initializeControllerFuture;
+                                                // Capture the picture
+                                                final image = await _controller
+                                                    .takePicture();
+
+                                                // Get the temporary directory
+                                                final directory =
+                                                    await getTemporaryDirectory();
+                                                // Define the new file path in the temporary directory
+                                                final String filePath =
+                                                    '${directory.path}/saved_image_${DateTime.now().millisecondsSinceEpoch}.jpg';
+
+                                                // Save the picture in the temporary directory
+                                                final savedImage =
+                                                    await File(image.path)
+                                                        .copy(filePath);
+
+                                                // Optionally show a confirmation
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(
+                                                        'Picture saved to temporary storage!'),
+                                                  ),
+                                                );
+
+                                                Navigator.pop(context);
+                                              } catch (e) {
+                                                print(
+                                                    "Error saving picture: $e");
+                                              }
+                                            },
+                                            style: TextButton.styleFrom(
+                                              backgroundColor:
+                                                  SustainUColors.limeGreen,
+                                              minimumSize: const Size(200, 50),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                              ),
+                                            ),
+                                            child: Text(
+                                              'Save Picture for Later',
+                                              style: GoogleFonts.montserrat(
+                                                color: Colors.white,
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 10),
+                                        Center(
+                                          child: TextButton(
+                                            onPressed: () =>
+                                                Navigator.pop(context),
+                                            style: TextButton.styleFrom(
+                                              backgroundColor:
+                                                  SustainUColors.limeGreen,
+                                              minimumSize: const Size(200, 50),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                              ),
+                                            ),
+                                            child: Text(
+                                              'Cancel',
+                                              style: GoogleFonts.montserrat(
+                                                color: Colors.white,
+                                                fontSize: 18,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
-                                actions: [
-                                  Center(
-                                    child: TextButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      child: Text(
-                                        'OK',
-                                        style: GoogleFonts.montserrat(
-                                          color: Colors.black,
-                                          fontSize: 18,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
                               );
                             },
                           );

@@ -28,8 +28,14 @@ class TrashTypeIcon {
 }
 
 String convertFileToBase64(File imageFile) {
-  Uint8List imageBytes = imageFile.readAsBytesSync();
-  return base64Encode(imageBytes);
+  try {
+    Uint8List imageBytes = imageFile.readAsBytesSync();
+    return base64Encode(imageBytes);
+  } catch (e) {
+    print("Error converting file to base64: $e");
+    // You might want to return an empty string or throw an exception
+    return '';
+  }
 }
 
 Future<Map<String, dynamic>> getAnswer(String imagePath) async {
@@ -114,6 +120,17 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
     super.dispose();
   }
 
+  Future<void> deleteImageFile() async {
+    try {
+      final file = File(widget.imagePath);
+      if (await file.exists()) {
+        await file.delete();
+      }
+    } catch (e) {
+      print("Error deleting image file: $e");
+    }
+  }
+
   // Function to start the timer
   void startTimer() {
     isTimerActive = true;
@@ -139,6 +156,7 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
 
     // Registrar el evento en Firebase Analytics con el tiempo y el resultado
     await logScanToFirestore((duration / 1000).ceil(), trashType);
+    await deleteImageFile();
     return result; // Return the result
   }
 
