@@ -8,6 +8,7 @@ import 'package:sustain_u/presentation/views/scoreboard_screen.dart';
 import '../../presentation/views/login_screen.dart';
 import '../../presentation/views/sign_in_screen.dart';
 import '../../presentation/views/camera_screen.dart';
+import '../../presentation/views/view_images_screen.dart';
 import 'package:camera/camera.dart';
 
 class AppRoutes {
@@ -22,6 +23,7 @@ class AppRoutes {
     '/recycle': (context) => RecycleScreen(),
     '/scoreboard': (context) => ScoreboardScreen(),
     '/history': (context) => HistoryScreen(),
+    '/viewImages': (context) => ViewImagesScreen(),
     };
   }
 }
