@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'display_picture_widget.dart';
-import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/utils/sustainu_colors.dart';
 import 'package:path_provider/path_provider.dart';
@@ -21,14 +21,30 @@ class CameraWidgetState extends State<CameraWidget> {
   late CameraController _controller;
   late Future<void> _initializeControllerFuture;
 
+  bool _isConnected = true;
+
   @override
   void initState() {
     super.initState();
     _controller = CameraController(
       widget.camera,
-      ResolutionPreset.high, // Set to high for better resolution
+      ResolutionPreset.high,
     );
     _initializeControllerFuture = _controller.initialize();
+
+    // Check initial connectivity and listen for connectivity changes
+    _checkInternetConnection();
+    Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
+      _checkInternetConnection();
+    });
+  }
+
+  Future<void> _checkInternetConnection() async {
+    var connectivityResult = await Connectivity().checkConnectivity();
+    setState(() {
+      _isConnected = connectivityResult == ConnectivityResult.mobile ||
+          connectivityResult == ConnectivityResult.wifi;
+    });
   }
 
   @override
@@ -61,9 +77,8 @@ class CameraWidgetState extends State<CameraWidget> {
                     backgroundColor: Colors.white,
                     onPressed: () async {
                       try {
-                        bool result =
-                            await InternetConnection().hasInternetAccess;
-                        if (!result) {
+                        if (!_isConnected) {
+                          // Show dialog for no internet connection
                           showDialog(
                             context: context,
                             builder: (context) {

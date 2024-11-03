@@ -7,7 +7,6 @@ import '../widgets/bottom_navbar.dart';
 import '../../data/services/storage_service.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
-import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -20,7 +19,6 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isConnected = true; // Track internet connection status
   late Connectivity _connectivity;
   List<File> _tempImages = [];
-
 
   @override
   void initState() {
@@ -42,14 +40,14 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  
   Future<void> _checkInternetConnection() async {
     var connectivityResult = await Connectivity().checkConnectivity();
     _updateConnectionStatus(connectivityResult);
   }
 
   void _updateConnectionStatus(ConnectivityResult result) {
-    bool connected = result == ConnectivityResult.mobile || result == ConnectivityResult.wifi;
+    bool connected = result == ConnectivityResult.mobile ||
+        result == ConnectivityResult.wifi;
 
     if (!connected && _isConnected) {
       _showNoInternetDialog(); // Show dialog if connection is lost
@@ -72,10 +70,16 @@ class _HomeScreenState extends State<HomeScreen> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                _checkInternetConnection(); 
+                _checkInternetConnection();
               },
               child: Text('Retry'),
-              
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<List<File>> _loadTemporaryImages() async {
     final directory = await getTemporaryDirectory();
     print(directory.path);
@@ -89,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     // Check for internet connection
-    bool hasInternet = await InternetConnection().hasInternetAccess;
+    bool hasInternet = _isConnected;
     if (hasInternet) {
       if (images.isNotEmpty) {
         _showImageDialog(images);
