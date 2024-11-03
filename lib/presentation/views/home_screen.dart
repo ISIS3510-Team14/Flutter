@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:connectivity_plus/connectivity_plus.dart'; // Importing connectivity package
 import '../../core/utils/sustainu_colors.dart';
 import '../widgets/head.dart';
 import '../widgets/bottom_navbar.dart';
@@ -16,11 +17,19 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   String _name = 'User';
   final StorageService _storageService = StorageService();
+  bool _isConnected = true; // Track internet connection status
+  late Connectivity _connectivity;
   List<File> _tempImages = [];
+
 
   @override
   void initState() {
     super.initState();
+    _connectivity = Connectivity();
+    _checkInternetConnection();
+    _connectivity.onConnectivityChanged.listen((ConnectivityResult result) {
+      _updateConnectionStatus(result);
+    });
     _loadUserProfile();
     _loadTemporaryImages(); // Now handles showing dialog internally
   }
@@ -33,6 +42,40 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  
+  Future<void> _checkInternetConnection() async {
+    var connectivityResult = await Connectivity().checkConnectivity();
+    _updateConnectionStatus(connectivityResult);
+  }
+
+  void _updateConnectionStatus(ConnectivityResult result) {
+    bool connected = result == ConnectivityResult.mobile || result == ConnectivityResult.wifi;
+
+    if (!connected && _isConnected) {
+      _showNoInternetDialog(); // Show dialog if connection is lost
+    }
+
+    setState(() {
+      _isConnected = connected;
+    });
+  }
+
+  void _showNoInternetDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('No Internet Connection'),
+          content: Text('Please check your internet connection and try again.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _checkInternetConnection(); 
+              },
+              child: Text('Retry'),
+              
   Future<List<File>> _loadTemporaryImages() async {
     final directory = await getTemporaryDirectory();
     print(directory.path);
@@ -129,7 +172,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             SizedBox(height: 10),
-
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
@@ -171,8 +213,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             SizedBox(height: 10),
-
-            // GridView to display buttons with local SVG assets
             GridView.count(
               crossAxisCount: 2,
               childAspectRatio: 1.2,
@@ -261,7 +301,6 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               icon is String
                   ? SvgPicture.asset(
-                      // Carga el archivo desde assets
                       icon,
                       height: 40,
                       colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
