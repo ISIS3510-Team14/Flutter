@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
-import '../../presentation/widgets/display_picture_widget.dart'; // Adjust the import based on your directory structure
+import 'package:path/path.dart' as path;
+import '../../presentation/widgets/display_picture_widget.dart';
 
 class ViewImagesScreen extends StatefulWidget {
   @override
@@ -13,18 +14,22 @@ class _ViewImagesScreenState extends State<ViewImagesScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    images = ModalRoute.of(context)!.settings.arguments as List<File>;
+    List<File> allFiles = ModalRoute.of(context)!.settings.arguments as List<File>;
+    
+    // Filter the files to include only those with image extensions
+    images = allFiles.where((file) {
+      final ext = path.extension(file.path).toLowerCase();
+      return ['.jpg', '.jpeg', '.png', '.gif'].contains(ext);
+    }).toList();
   }
 
   void _deleteImage(int index) async {
     try {
-      // Delete the image from storage
       await images[index].delete();
     } catch (e) {
-      print('Error deleting image: $e'); // Handle any errors
+      print('Error deleting image: $e');
     }
 
-    // Remove the image from the list after deletion
     setState(() {
       images.removeAt(index);
     });
@@ -37,9 +42,8 @@ class _ViewImagesScreenState extends State<ViewImagesScreen> {
       body: ListView.builder(
         itemCount: images.length,
         itemBuilder: (context, index) {
-          // Check if the path is a valid file before accessing it
           if (!images[index].existsSync() || images[index].statSync().type == FileSystemEntityType.directory) {
-            return SizedBox.shrink(); // Skip the item if it's not a valid file
+            return SizedBox.shrink();
           }
 
           DateTime date = images[index].lastModifiedSync();
@@ -69,17 +73,14 @@ class _ViewImagesScreenState extends State<ViewImagesScreen> {
               title: Text('Image ${index + 1}'),
               subtitle: Text('${date.toLocal()}'.split(' ')[0]),
               onTap: () async {
-                // Display the full image
                 final imagePath = images[index].path;
 
-                // Push to DisplayPictureScreen (from the imported widget)
                 await Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) => DisplayPictureScreen(imagePath: imagePath),
                   ),
                 );
 
-                // Delete the image after viewing
                 _deleteImage(index);
               },
             ),
