@@ -38,7 +38,7 @@ class GreenPoints extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: Image.network(
-                imagePath, // Ensure imgPath contains the URL from Firestore
+                imagePath,
                 width: 400,
                 errorBuilder: (context, error, stackTrace) {
                   return const Text('Image not available');
