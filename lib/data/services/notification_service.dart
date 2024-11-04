@@ -7,10 +7,30 @@ class NotificationService {
   final FlutterLocalNotificationsPlugin _localNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
+  static const String defaultChannelId = 'recycle_reminder_channel';
+
   Future<void> initialize() async {
-    // Request permissions for notifications
+    
     await _firebaseMessaging.requestPermission();
     print("Notification permissions requested.");
+
+    
+    String? token = await _firebaseMessaging.getToken();
+    print("FCM Token: $token");
+
+    
+    const AndroidNotificationChannel channel = AndroidNotificationChannel(
+      defaultChannelId, 
+      'Recycle Reminders', 
+      description: 'Notifications to remind about recycling',
+      importance: Importance.high,
+    );
+
+    await _localNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(channel);
+    print("Notification channel created.");
 
     // Initialize local notifications
     const AndroidInitializationSettings initializationSettingsAndroid =
@@ -21,7 +41,7 @@ class NotificationService {
     await _localNotificationsPlugin.initialize(initializationSettings);
     print("Local notifications plugin initialized.");
 
-    // Listen for Firebase messages while the app is in foreground
+    
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       _showNotification(
         message.notification?.title ?? 'No Title',
@@ -34,8 +54,8 @@ class NotificationService {
   Future<void> _showNotification(String title, String body) async {
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails(
-      'recycle_reminder_channel', // Channel ID
-      'Recycle Reminders', // Channel name
+      defaultChannelId, 
+      'Recycle Reminders', 
       channelDescription: 'Notifications to remind about recycling',
       importance: Importance.max,
       priority: Priority.high,
@@ -44,7 +64,7 @@ class NotificationService {
         NotificationDetails(android: androidPlatformChannelSpecifics);
 
     await _localNotificationsPlugin.show(
-      0, // Notification ID
+      0, 
       title,
       body,
       platformChannelSpecifics,
@@ -60,7 +80,7 @@ class NotificationService {
       _nextInstanceOfTime(10, 0),
       const NotificationDetails(
         android: AndroidNotificationDetails(
-          'daily_recycle_reminder',
+          defaultChannelId,
           'Daily Recycle Reminder',
           channelDescription: 'Daily reminder to recycle',
           importance: Importance.max,
@@ -83,7 +103,7 @@ class NotificationService {
       _nextInstanceOfTime(20, 0),
       const NotificationDetails(
         android: AndroidNotificationDetails(
-          'end_of_day_reminder',
+          defaultChannelId,
           'End of Day Reminder',
           channelDescription: 'Reminder at the end of the day',
           importance: Importance.max,
