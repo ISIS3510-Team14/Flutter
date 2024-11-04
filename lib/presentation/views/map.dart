@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
@@ -44,8 +43,21 @@ class _GoogleMapsState extends State<GoogleMaps> {
   }
 
   Future<void> fetchInitialLocationPoints() async {
-    final connectivityResult = await Connectivity().checkConnectivity();
+    // Attempt to fetch points first
+    final pointsList =
+        await _repository.getInitialPoints(currentPosition ?? myLoc);
 
+    // Check if points list is empty and show NoInfo dialog
+    if (pointsList.isEmpty && !_dialogShown) {
+      _showNoInfoDialog();
+      return; // Exit function if NoInfo dialog is shown
+    }
+
+    // Update points in the state if not empty
+    updatePoints(pointsList);
+
+    // Check connectivity only if points list is not empty
+    final connectivityResult = await Connectivity().checkConnectivity();
     if ((connectivityResult != ConnectivityResult.wifi &&
             connectivityResult != ConnectivityResult.mobile) &&
         !_dialogShown) {
@@ -56,15 +68,6 @@ class _GoogleMapsState extends State<GoogleMaps> {
         _showNoWifiDialog();
       }
     }
-
-    if (currentPosition == null) {
-      final pointsList = await _repository.getInitialPoints(myLoc);
-      updatePoints(pointsList);
-      return;
-    }
-
-    final pointsList = await _repository.getInitialPoints(currentPosition!);
-    updatePoints(pointsList);
   }
 
   Future<bool> _hasInternetConnection() async {
@@ -85,7 +88,7 @@ class _GoogleMapsState extends State<GoogleMaps> {
   }
 
   void _showNoWifiDialog() {
-    _dialogShown = true; // Set flag to true to prevent further dialogs
+    _dialogShown = true;
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -93,6 +96,28 @@ class _GoogleMapsState extends State<GoogleMaps> {
           title: const Text("Offline"),
           content: const Text(
               "You are not connected to Wi-Fi. A default map will be displayed."),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text("OK"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showNoInfoDialog() {
+    _dialogShown = true;
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Offline"),
+          content: const Text(
+              "You are not connected to Wi-Fi. Points have not been fetched before, please connect to wifi to get the green points."),
           actions: [
             TextButton(
               onPressed: () {
