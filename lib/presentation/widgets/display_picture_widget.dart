@@ -28,11 +28,17 @@ class TrashTypeIcon {
 }
 
 String convertFileToBase64(File imageFile) {
-  Uint8List imageBytes = imageFile.readAsBytesSync();
-  return base64Encode(imageBytes);
+  try {
+    Uint8List imageBytes = imageFile.readAsBytesSync();
+    return base64Encode(imageBytes);
+  } catch (e) {
+    print("Error converting file to base64: $e");
+    // You might want to return an empty string or throw an exception
+    return '';
+  }
 }
 
-Future<Map<String, dynamic>> getAnswer(String imagePath) async {
+Future<Map<String, dynamic>> getAnswer(String imagePath, Timer timer) async {
   String? openaiAnswer;
   String imageBase64;
   String foundTrashType = 'None';
@@ -57,24 +63,31 @@ Future<Map<String, dynamic>> getAnswer(String imagePath) async {
     TrashTypeIcon('Paint Can', Icons.palette),
     TrashTypeIcon('No Item Detected', Icons.announcement_outlined),
   ];
+  try {
+    String trashString = trashTypes.map((e) => e.type).join(', ');
+    openaiAnswer = await ChatService().request(
+        "Answer for the image: Which of these types of trash is the user taking the picture holding?: $trashString. Answer only with the type",
+        imageBase64);
+    print(openaiAnswer);
 
-  String trashString = trashTypes.map((e) => e.type).join(', ');
-  openaiAnswer = await ChatService().request(
-      "Answer for the image: Which of these types of trash is the user taking the picture holding?: $trashString. Answer only with the type",
-      imageBase64);
-  print(openaiAnswer);
-
-  for (TrashTypeIcon trash in trashTypes) {
-    if (openaiAnswer!.toLowerCase().contains(trash.type.toLowerCase())) {
-      foundTrashType = trash.type;
-      if (foundTrashType != "No Item Detected") {
-        openaiAnswer = await ChatService().request(
-            "Answer for the image: What is the most appropriate bin to dispose of a $foundTrashType in?. Indicate if none of the present bins are appropriate. Answer only with a maximum of 20 words.",
-            imageBase64);
-        appropriateBin = openaiAnswer!;
+    for (TrashTypeIcon trash in trashTypes) {
+      if (openaiAnswer!.toLowerCase().contains(trash.type.toLowerCase())) {
+        foundTrashType = trash.type;
+        if (foundTrashType != "No Item Detected") {
+          openaiAnswer = await ChatService().request(
+              "Answer for the image: What is the most appropriate bin to dispose of a $foundTrashType in?. Indicate if none of the present bins are appropriate. Answer only with a maximum of 20 words.",
+              imageBase64);
+          appropriateBin = openaiAnswer!;
+        }
+        break; // Exit loop after the first match
       }
-      break; // Exit loop after the first match
     }
+  } catch (e) {
+    // Modify the error message
+    timer.cancel();
+    String errorMessage = "Lost connection to the internet. Make sure you have an internet connection and try again";
+    // Rethrow the exception with the new message
+    throw Exception(errorMessage);
   }
 
   return {
@@ -114,6 +127,17 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
     super.dispose();
   }
 
+  Future<void> deleteImageFile() async {
+    try {
+      final file = File(widget.imagePath);
+      if (await file.exists()) {
+        await file.delete();
+      }
+    } catch (e) {
+      print("Error deleting image file: $e");
+    }
+  }
+
   // Function to start the timer
   void startTimer() {
     isTimerActive = true;
@@ -127,7 +151,7 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
   }
 
   Future<Map<String, dynamic>> getAnswerWithTiming() async {
-    final result = await getAnswer(widget.imagePath);
+    final result = await getAnswer(widget.imagePath, _timer);
     _timer.cancel(); // Stop the timer when the future is completed
 
     final startTime = DateTime.now(); // Empieza el conteo del tiempo
@@ -139,6 +163,7 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
 
     // Registrar el evento en Firebase Analytics con el tiempo y el resultado
     await logScanToFirestore((duration / 1000).ceil(), trashType);
+    await deleteImageFile();
     return result; // Return the result
   }
 

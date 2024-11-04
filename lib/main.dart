@@ -6,9 +6,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:camera/camera.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:flutter/material.dart';
-
-
+import 'package:sustain_u/data/services/notification_service.dart';
 
 const appScheme = 'flutter.sustainu';
 
@@ -25,18 +23,39 @@ void main() async {
   runApp(MyApp(camera: firstCamera));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   final CameraDescription camera;
 
   static FirebaseAnalytics analytics = FirebaseAnalytics.instance;
   static FirebaseAnalyticsObserver observer =
       FirebaseAnalyticsObserver(analytics: analytics);
 
-  MyApp({required this.camera});
+  const MyApp({required this.camera});
+
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  final NotificationService _notificationService = NotificationService();
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeNotificationService();
+  }
+
+  Future<void> _initializeNotificationService() async {
+    await _notificationService.initialize();
+    // Schedule notifications if needed
+    await _notificationService.scheduleDailyRecycleReminder();
+    await _notificationService.scheduleEndOfDayReminder();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      navigatorObservers: [observer],
+      navigatorObservers: [MyApp.observer],
       debugShowCheckedModeBanner: false,
       title: AppConstants.appName,
       theme: ThemeData(
@@ -64,7 +83,7 @@ class MyApp extends StatelessWidget {
         ),
       ),
       initialRoute: '/',
-      routes: AppRoutes.routes(camera),
+      routes: AppRoutes.routes(widget.camera),
     );
   }
 }

@@ -51,7 +51,12 @@ dependencies:
   googleapis: ^13.2.0
   cloud_firestore: ^4.17.5
   geolocator: ^9.0.1
-  connectivity_plus: ^6.1.0
+  connectivity_plus: ^3.0.3
+  firebase_messaging: ^14.7.10
+  flutter_local_notifications: ^17.2.4
+  flutter_timezone: ^3.0.1
+  timezone: ^0.9.4
+  url_launcher: ^6.0.20
 
 dev_dependencies:
   flutter_test:
@@ -83,6 +88,12 @@ flutter:
   - assets/logo (1).png
   - assets/logo.png
   - assets/img.png
+  - assets/glass.png
+  - assets/paper.png
+  - assets/metal.png
+  - assets/plastic.png
+  - assets/trash_blue.png
+  - assets/trash_grey.png
     #-ic_pick.png
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
