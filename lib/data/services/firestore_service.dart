@@ -32,7 +32,6 @@ class FirestoreService {
   }
 
   Future<List<LocationPoint>> fetchLocationPoints() async {
-    print("POINTS ARE IN CHACHE");
     try {
       final snapshot = await _db
           .collection('locationdb')

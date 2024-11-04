@@ -45,20 +45,16 @@ class _GoogleMapsState extends State<GoogleMaps> {
   }
 
   Future<void> fetchInitialLocationPoints() async {
-    // Attempt to fetch points first
     final pointsList =
         await _repository.getInitialPoints(currentPosition ?? myLoc);
 
-    // Check if points list is empty and show NoInfo dialog
     if (pointsList.isEmpty && !_dialogShown) {
       _showNoInfoDialog();
-      return; // Exit function if NoInfo dialog is shown
+      return;
     }
 
-    // Update points in the state if not empty
     updatePoints(pointsList);
 
-    // Check connectivity only if points list is not empty
     final connectivityResult = await Connectivity().checkConnectivity();
     if ((connectivityResult != ConnectivityResult.wifi &&
             connectivityResult != ConnectivityResult.mobile) &&
@@ -292,8 +288,10 @@ class _GoogleMapsState extends State<GoogleMaps> {
               myLocationEnabled: true,
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.only(top: 30.0, left: 16.0, right: 16.0),
+          Positioned(
+            top: 36.0,
+            left: 16.0,
+            right: 16.0,
             child: HeaderWidget(),
           ),
           DraggableScrollableSheet(

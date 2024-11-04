@@ -12,7 +12,6 @@ class LocationPointRepository {
     points = await _firestoreService.fetchLocationPoints();
 
     if (points.isEmpty) {
-      print("POINTS NOT IN CACHE");
       points = await _firestoreService.fetchLocationPointsFromServer();
     }
 
