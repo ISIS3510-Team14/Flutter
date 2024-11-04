@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
+import 'package:sustain_u/core/utils/sustainu_colors.dart';
 import 'package:sustain_u/data/models/loc_model.dart';
 import 'package:sustain_u/data/repositories/loc_repository.dart';
 import 'package:sustain_u/presentation/views/greenpoints.dart';
@@ -93,15 +95,48 @@ class _GoogleMapsState extends State<GoogleMaps> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text("Offline"),
-          content: const Text(
-              "You are not connected to Wi-Fi. A default map will be displayed."),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Text(
+            'Offline',
+            style: GoogleFonts.montserrat(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          content: Text(
+            'You are not connected to Wi-Fi. A default map will be displayed.',
+            style: GoogleFonts.montserrat(
+              color: Colors.black54,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
           actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text("OK"),
+            Center(
+              child: TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                style: TextButton.styleFrom(
+                  backgroundColor: SustainUColors.limeGreen,
+                  minimumSize: const Size(200, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: Text(
+                  'OK',
+                  style: GoogleFonts.montserrat(
+                    color: Colors.white,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
             ),
           ],
         );
@@ -115,15 +150,48 @@ class _GoogleMapsState extends State<GoogleMaps> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text("Offline"),
-          content: const Text(
-              "You are not connected to Wi-Fi. Points have not been fetched before, please connect to wifi to get the green points."),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Text(
+            'Offline',
+            style: GoogleFonts.montserrat(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          content: Text(
+            'You are not connected to Wi-Fi. Points have not been fetched before, please connect to WiFi to get the green points.',
+            style: GoogleFonts.montserrat(
+              color: Colors.black54,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
           actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text("OK"),
+            Center(
+              child: TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                style: TextButton.styleFrom(
+                  backgroundColor: SustainUColors.limeGreen,
+                  minimumSize: const Size(200, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: Text(
+                  'OK',
+                  style: GoogleFonts.montserrat(
+                    color: Colors.white,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
             ),
           ],
         );
