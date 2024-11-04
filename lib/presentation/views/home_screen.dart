@@ -5,6 +5,9 @@ import '../../core/utils/sustainu_colors.dart';
 import '../widgets/head.dart';
 import '../widgets/bottom_navbar.dart';
 import '../../data/services/storage_service.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -16,6 +19,8 @@ class _HomeScreenState extends State<HomeScreen> {
   final StorageService _storageService = StorageService();
   bool _isConnected = true; // Track internet connection status
   late Connectivity _connectivity;
+  List<File> _tempImages = [];
+
 
   @override
   void initState() {
@@ -26,15 +31,18 @@ class _HomeScreenState extends State<HomeScreen> {
       _updateConnectionStatus(result);
     });
     _loadUserProfile();
+    _loadTemporaryImages(); 
   }
 
   Future<void> _loadUserProfile() async {
-    Map<String, dynamic>? credentials = await _storageService.getUserCredentials();
+    Map<String, dynamic>? credentials =
+        await _storageService.getUserCredentials();
     setState(() {
       _name = credentials?['nickname'] ?? 'User';
     });
   }
 
+  
   Future<void> _checkInternetConnection() async {
     var connectivityResult = await Connectivity().checkConnectivity();
     _updateConnectionStatus(connectivityResult);
@@ -67,6 +75,74 @@ class _HomeScreenState extends State<HomeScreen> {
                 _checkInternetConnection(); 
               },
               child: Text('Back To Home'),
+              
+              
+  Future<List<File>> _loadTemporaryImages() async {
+    final directory = await getTemporaryDirectory();
+    print(directory.path);
+    final tempImages = Directory(directory.path);
+    List<File> images = [];
+
+    if (await tempImages.exists()) {
+      // List all files in the directory
+      final items = tempImages.listSync();
+      images = items.whereType<File>().toList(); // Ensure we only get files
+    }
+
+    // Check for internet connection
+    bool hasInternet = await InternetConnection().hasInternetAccess;
+    if (hasInternet) {
+      if (images.isNotEmpty) {
+        _showImageDialog(images);
+      } else {
+        _showNoImagesDialog(); // Show popup if no images are found
+      }
+    }
+
+    return images; // Return the loaded images
+  }
+
+  void _showNoImagesDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('No Temporary Images'),
+          content: Text('No temporary images are available at the moment.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showImageDialog(List<File> images) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Temporary Images Loaded'),
+          content:
+              Text('You have images available. Would you like to view them?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+                Navigator.pushNamed(context, '/viewImages', arguments: images);
+              },
+              child: Text('View Images'),
             ),
           ],
         );
@@ -191,7 +267,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                     child: Text(
                       'Scan',
-                      style: TextStyle(color: Colors.white, fontFamily: 'Montserrat'),
+                      style: TextStyle(
+                          color: Colors.white, fontFamily: 'Montserrat'),
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: SustainUColors.limeGreen,
@@ -207,7 +284,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildFlatButton(String label, dynamic icon, Color color, String route) {
+  Widget _buildFlatButton(
+      String label, dynamic icon, Color color, String route) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,

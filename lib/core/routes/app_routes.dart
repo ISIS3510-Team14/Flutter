@@ -12,6 +12,7 @@ import 'package:sustain_u/presentation/views/scoreboard_screen.dart';
 import '../../presentation/views/login_screen.dart';
 import '../../presentation/views/sign_in_screen.dart';
 import '../../presentation/views/camera_screen.dart';
+import '../../presentation/views/view_images_screen.dart';
 import 'package:camera/camera.dart';
 import 'package:sustain_u/presentation/views/instructions_screen.dart';
 
@@ -32,6 +33,7 @@ class AppRoutes {
     '/plastic': (context) => PlasticScreen(),
     '/metal': (context) => MetalScreen(),
     '/glass': (context) => GlassScreen(),
+    '/viewImages': (context) => ViewImagesScreen(),
     };
   }
 }
