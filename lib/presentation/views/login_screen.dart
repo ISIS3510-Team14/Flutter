@@ -34,7 +34,6 @@ class _LoginScreenState extends State<LoginScreen> {
     _checkIfLoggedIn();
     _checkInternetConnection(); 
 
-
     _connectivityStream.listen((ConnectivityResult result) {
       _updateConnectionStatus(result);
     });
@@ -69,7 +68,6 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       final credentials = await auth0.webAuthentication(scheme: appScheme).login();
 
-   
       Map<String, dynamic> decodedToken = JwtDecoder.decode(credentials.idToken);
 
       final lastLogin = credentials.user.updatedAt?.toIso8601String() ?? 'Unknown Date';
@@ -105,88 +103,90 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: SustainUColors.background,
-      body: Center(
-        child: _isLoading
-            ? CircularProgressIndicator()
-            : Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    'assets/img.png',
-                    height: 250,
-                    width: 250,
-                  ),
-                  SizedBox(height: 10),
-                  Image.asset(
-                    'assets/logo.png',
-                    height: 130,
-                    width: 130,
-                  ),
-                  SizedBox(height: 5),
-                  Text(
-                    'SustainU',
-                    style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 30),
-                  ElevatedButton(
-                    onPressed: _isConnected ? authenticate : null,
-                    child: Text('Log in / Sign up', style: TextStyle(color: Colors.white)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _isConnected ? Color(0xFFB1CC33) : Colors.grey,
-                      minimumSize: Size(220, 60),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15.0),
+      body: SingleChildScrollView(  // Added SingleChildScrollView to allow scrolling
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),  // Added padding for better layout on small screens
+            child: _isLoading
+                ? CircularProgressIndicator()
+                : Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(height: 60), // Added space at the top
+                      Image.asset(
+                        'assets/img.png',
+                        height: 250,
+                        width: 250,
                       ),
-                    ),
-                  ),
-                  if (!_isConnected) ...[
-                    SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: _checkInternetConnection,
-                      child: Text('Retry', style: TextStyle(color: Colors.white)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
-                        minimumSize: Size(220, 60),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15.0),
+                      SizedBox(height: 10),
+                      Image.asset(
+                        'assets/logo.png',
+                        height: 130,
+                        width: 130,
+                      ),
+                      SizedBox(height: 5),
+                      Text(
+                        'SustainU',
+                        style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(height: 30),
+                      ElevatedButton(
+                        onPressed: _isConnected ? authenticate : null,
+                        child: Text('Log in / Sign up', style: TextStyle(color: Colors.white)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _isConnected ? Color(0xFFB1CC33) : Colors.grey,
+                          minimumSize: Size(220, 60),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15.0),
+                          ),
                         ),
                       ),
-                    ),
-                    SizedBox(height: 10),
-                    Text(
-                      'No Internet Connection, To Login/Sign up Please Connect To Internet',
-                      style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                  SizedBox(height: 30),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pushNamed(context, '/instructions');
-                    },
-                    child: Text(
-                      'Login/Signup Instructions',
-                      style: TextStyle(
-                        fontFamily: 'Montserrat',
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: SustainUColors.text,
+                      if (!_isConnected) ...[
+                        SizedBox(height: 20),
+                        ElevatedButton(
+                          onPressed: _checkInternetConnection,
+                          child: Text('Retry', style: TextStyle(color: Colors.white)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orange,
+                            minimumSize: Size(220, 60),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15.0),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        Text(
+                          'No Internet Connection, To Login/Sign up Please Connect To Internet',
+                          style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                      SizedBox(height: 30),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamed(context, '/instructions');
+                        },
+                        child: Text(
+                          'Login/Signup Instructions',
+                          style: TextStyle(
+                            fontFamily: 'Montserrat',
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: SustainUColors.text,
+                          ),
+                        ),
                       ),
-                    ),
+                      SizedBox(height: 20), // Additional space at the bottom
+                    ],
                   ),
-                ],
-              ),
+          ),
+        ),
       ),
     );
   }
 
   @override
   void dispose() {
-    
     super.dispose();
   }
 }
-
-// https://pub.dev/packages/connectivity_plus
-
-// https://fernandoptr.medium.com/how-to-check-network-connectivity-status-in-flutter-connectivity-plus-package-2153783883a0

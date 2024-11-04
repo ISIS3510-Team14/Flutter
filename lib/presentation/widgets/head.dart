@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:connectivity_plus/connectivity_plus.dart'; 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import '../../data/services/storage_service.dart';
 
 class HeaderWidget extends StatefulWidget {
@@ -10,13 +10,13 @@ class HeaderWidget extends StatefulWidget {
 class _HeaderWidgetState extends State<HeaderWidget> {
   final StorageService _storageService = StorageService();
   bool _isConnected = true;
-  String? _profilePictureUrl; 
+  String? _profilePictureUrl;
 
   @override
   void initState() {
     super.initState();
-    _loadInitialData(); 
-    
+    _loadInitialData();
+
     Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
       _checkInternetConnection();
     });
@@ -24,9 +24,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
 
   Future<void> _loadInitialData() async {
     await _checkInternetConnection();
-    
     _profilePictureUrl = await _loadUserProfilePicture();
-   
     setState(() {});
   }
 
@@ -39,9 +37,18 @@ class _HeaderWidgetState extends State<HeaderWidget> {
   }
 
   Future<String?> _loadUserProfilePicture() async {
-    Map<String, dynamic>? credentials =
-        await _storageService.getUserCredentials();
-    return credentials?['picture'];
+    
+    String? cachedPictureUrl = await _storageService.getCachedProfilePicture();
+  
+    if (cachedPictureUrl == null) {
+      Map<String, dynamic>? credentials = await _storageService.getUserCredentials();
+      cachedPictureUrl = credentials?['picture'];
+      if (cachedPictureUrl != null) {
+        await _storageService.cacheProfilePicture(cachedPictureUrl);
+      }
+    }
+    
+    return cachedPictureUrl;
   }
 
   @override
@@ -53,31 +60,56 @@ class _HeaderWidgetState extends State<HeaderWidget> {
           'assets/logo (1).png',
           height: 50,
         ),
-        if (!_isConnected)
-          Icon(
-            Icons.wifi_off,
-            color: Colors.red,
-            size: 28,
-          )
-        else
-          GestureDetector(
-            onTap: () {
-              Navigator.pushNamed(context, '/profile');
-            },
-            child: CircleAvatar(
-              radius: 24,
-              backgroundImage: _profilePictureUrl != null && _profilePictureUrl!.isNotEmpty
-                  ? NetworkImage(_profilePictureUrl!)
-                  : null, 
-              child: _profilePictureUrl == null || _profilePictureUrl!.isEmpty
-                  ? Icon(
-                      Icons.person,
-                      size: 24,
-                      color: Colors.white,
-                    )
-                  : null, 
-            ),
+        Expanded(
+          child: Center(
+            child: _isConnected
+                ? Text(
+                    '',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.wifi_off,
+                        color: Colors.red,
+                        size: 28,
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        'No Internet Connection',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red,
+                        ),
+                      ),
+                    ],
+                  ),
           ),
+        ),
+        GestureDetector(
+          onTap: () {
+            Navigator.pushNamed(context, '/profile');
+          },
+          child: CircleAvatar(
+            radius: 24,
+            backgroundImage: _profilePictureUrl != null
+                ? NetworkImage(_profilePictureUrl!)
+                : null,
+            child: _profilePictureUrl == null
+                ? Icon(
+                    Icons.person,
+                    size: 24,
+                    color: Colors.white,
+                  )
+                : null,
+          ),
+        ),
       ],
     );
   }
