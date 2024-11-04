@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:url_launcher/url_launcher.dart'; 
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/utils/sustainu_colors.dart';
 import '../widgets/head.dart';
 import '../widgets/bottom_navbar.dart';
@@ -24,6 +24,12 @@ class _RecycleScreenState extends State<RecycleScreen> {
     });
   }
 
+  @override
+  void dispose() {
+    _connectivity.onConnectivityChanged.drain(); // Stop listening when leaving RecycleScreen
+    super.dispose();
+  }
+
   Future<void> _checkInternetConnection() async {
     var connectivityResult = await Connectivity().checkConnectivity();
     _updateConnectionStatus(connectivityResult);
@@ -33,7 +39,7 @@ class _RecycleScreenState extends State<RecycleScreen> {
     bool connected = result == ConnectivityResult.mobile || result == ConnectivityResult.wifi;
 
     if (!connected && _isConnected) {
-      _showNoInternetNotification();
+      _showNoInternetNotification(); // Show snackbar only on RecycleScreen
     }
 
     setState(() {
@@ -44,7 +50,13 @@ class _RecycleScreenState extends State<RecycleScreen> {
   void _showNoInternetNotification() {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('No Internet Connection'),
+        content: Text(
+          'No Internet Connection',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         backgroundColor: Colors.red,
         duration: Duration(seconds: 3),
       ),
