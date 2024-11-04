@@ -1,7 +1,6 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:timezone/timezone.dart' as tz;
-import 'package:timezone/data/latest_all.dart' as tz;
 
 class NotificationService {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
@@ -9,10 +8,9 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
 
   Future<void> initialize() async {
-    tz.initializeTimeZones();
-
-    // Request permissions for Firebase messaging
+    // Request permissions for notifications
     await _firebaseMessaging.requestPermission();
+    print("Notification permissions requested.");
 
     // Initialize local notifications
     const AndroidInitializationSettings initializationSettingsAndroid =
@@ -21,18 +19,23 @@ class NotificationService {
         InitializationSettings(android: initializationSettingsAndroid);
 
     await _localNotificationsPlugin.initialize(initializationSettings);
+    print("Local notifications plugin initialized.");
 
-    // Listen for incoming messages
+    // Listen for Firebase messages while the app is in foreground
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      _showNotification(message.notification?.title, message.notification?.body);
+      _showNotification(
+        message.notification?.title ?? 'No Title',
+        message.notification?.body ?? 'No Body',
+      );
     });
+    print("Foreground message listener set up.");
   }
 
-  Future<void> _showNotification(String? title, String? body) async {
+  Future<void> _showNotification(String title, String body) async {
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails(
-      'recycle_reminder_channel', 
-      'Recycle Reminders', 
+      'recycle_reminder_channel', // Channel ID
+      'Recycle Reminders', // Channel name
       channelDescription: 'Notifications to remind about recycling',
       importance: Importance.max,
       priority: Priority.high,
@@ -41,11 +44,12 @@ class NotificationService {
         NotificationDetails(android: androidPlatformChannelSpecifics);
 
     await _localNotificationsPlugin.show(
-      0, 
+      0, // Notification ID
       title,
       body,
       platformChannelSpecifics,
     );
+    print("Notification shown with title: $title and body: $body");
   }
 
   Future<void> scheduleDailyRecycleReminder() async {
@@ -68,6 +72,7 @@ class NotificationService {
           UILocalNotificationDateInterpretation.wallClockTime,
       matchDateTimeComponents: DateTimeComponents.time,
     );
+    print("Daily recycle reminder scheduled.");
   }
 
   Future<void> scheduleEndOfDayReminder() async {
@@ -75,7 +80,7 @@ class NotificationService {
       2,
       'End of Day Reminder',
       'Don’t lose your recycling streak!',
-      _nextInstanceOfTime(20, 0), 
+      _nextInstanceOfTime(20, 0),
       const NotificationDetails(
         android: AndroidNotificationDetails(
           'end_of_day_reminder',
@@ -90,6 +95,7 @@ class NotificationService {
           UILocalNotificationDateInterpretation.wallClockTime,
       matchDateTimeComponents: DateTimeComponents.time,
     );
+    print("End of day reminder scheduled.");
   }
 
   tz.TZDateTime _nextInstanceOfTime(int hour, int minute) {

@@ -66,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Navigator.of(context).pop();
                 _checkInternetConnection(); 
               },
-              child: Text('Retry'),
+              child: Text('Back To Home'),
             ),
           ],
         );

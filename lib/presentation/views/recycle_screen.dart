@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:url_launcher/url_launcher.dart'; // Import the url_launcher package
+import 'package:url_launcher/url_launcher.dart'; 
 import '../../core/utils/sustainu_colors.dart';
 import '../widgets/head.dart';
 import '../widgets/bottom_navbar.dart';
@@ -75,7 +75,7 @@ class _RecycleScreenState extends State<RecycleScreen> {
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
               crossAxisCount: 2,
-              childAspectRatio: 0.8, // Adjusted for more vertical space per item
+              childAspectRatio: 0.8,
               mainAxisSpacing: 10,
               crossAxisSpacing: 10,
               children: [
@@ -101,41 +101,8 @@ class _RecycleScreenState extends State<RecycleScreen> {
                 ),
               ],
             ),
-            if (_isConnected) ...[
-              SizedBox(height: 20),
-              Container(
-                padding: const EdgeInsets.all(16.0),
-                color: Colors.grey[200],
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Center(
-                      child: Text(
-                        'More Information:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: SustainUColors.text,
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 10),
-                    _buildLinkButton(
-                      'How to Recycle - How2Recycle',
-                      'https://how2recycle.info/',
-                    ),
-                    _buildLinkButton(
-                      'EPA: How to Recycle Common Recyclables',
-                      'https://www.epa.gov/recycle/how-do-i-recycle-common-recyclables',
-                    ),
-                    _buildLinkButton(
-                      'Earth Day: 7 Tips to Recycle Better',
-                      'https://www.earthday.org/7-tips-to-recycle-better/',
-                    ),
-                  ],
-                ),
-              ),
-            ],
+            SizedBox(height: 20),
+            _isConnected ? _buildMoreInfoSection() : Container(),
           ],
         ),
       ),
@@ -152,17 +119,15 @@ class _RecycleScreenState extends State<RecycleScreen> {
         ),
         padding: const EdgeInsets.all(16.0),
       ),
-      onPressed: _isConnected
-          ? () {
-              Navigator.pushNamed(context, '/$label'.toLowerCase());
-            }
-          : null,
+      onPressed: () {
+        Navigator.pushNamed(context, '/$label'.toLowerCase());
+      },
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Image.asset(
             icon,
-            height: 60, // Increased height for better visibility
+            height: 60,
           ),
           SizedBox(height: 10),
           Text(
@@ -170,7 +135,7 @@ class _RecycleScreenState extends State<RecycleScreen> {
             style: TextStyle(
               fontFamily: 'Montserrat',
               fontWeight: FontWeight.bold,
-              fontSize: 18, // Increased font size for readability
+              fontSize: 18,
             ),
           ),
           SizedBox(height: 5),
@@ -178,12 +143,63 @@ class _RecycleScreenState extends State<RecycleScreen> {
             subLabel,
             style: TextStyle(
               fontFamily: 'Montserrat',
-              fontSize: 14, // Increased font size for readability
+              fontSize: 14,
               color: Colors.grey[600],
             ),
             textAlign: TextAlign.center,
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildMoreInfoSection() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              spreadRadius: 3,
+              blurRadius: 6,
+              offset: Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Text(
+                  'More Information:',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: SustainUColors.text,
+                  ),
+                ),
+              ),
+              SizedBox(height: 15),
+              _buildLinkButton(
+                'How to Recycle - How2Recycle',
+                'https://how2recycle.info/',
+              ),
+              _buildLinkButton(
+                'EPA: How to Recycle Common Recyclables',
+                'https://www.epa.gov/recycle/how-do-i-recycle-common-recyclables',
+              ),
+              _buildLinkButton(
+                'Earth Day: 7 Tips to Recycle Better',
+                'https://www.earthday.org/7-tips-to-recycle-better/',
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -194,12 +210,13 @@ class _RecycleScreenState extends State<RecycleScreen> {
       child: Align(
         alignment: Alignment.centerLeft,
         child: InkWell(
-          onTap: () => _launchURL(url), // Use the _launchURL function to open the link
+          onTap: () => _launchURL(url),
           child: Text(
             label,
             style: TextStyle(
-              color: Colors.blue,
+              color: Colors.blueAccent,
               fontSize: 16,
+              fontWeight: FontWeight.w500,
               decoration: TextDecoration.underline,
             ),
           ),
@@ -208,7 +225,6 @@ class _RecycleScreenState extends State<RecycleScreen> {
     );
   }
 
-  // Function to launch the URL
   Future<void> _launchURL(String url) async {
     if (await canLaunch(url)) {
       await launch(url);
