@@ -1,12 +1,16 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
+import 'package:sustain_u/core/utils/sustainu_colors.dart';
 import 'package:sustain_u/data/models/loc_model.dart';
 import 'package:sustain_u/data/repositories/loc_repository.dart';
 import 'package:sustain_u/presentation/views/greenpoints.dart';
 import 'package:sustain_u/presentation/widgets/bottom_navbar.dart';
 import '../../data/services/firestore_service.dart';
 import '../widgets/head.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class GoogleMaps extends StatefulWidget {
   const GoogleMaps({super.key});
@@ -26,30 +30,174 @@ class _GoogleMapsState extends State<GoogleMaps> {
   final LocationPointRepository _repository = LocationPointRepository();
   List<LocationPoint> points = [];
   List<LocationPoint> filteredPoints = [];
+  bool isNavigating = false;
+  bool _dialogShown = false;
 
   @override
   void initState() {
     super.initState();
-    points = _repository.getInitialPoints();
-    filteredPoints = points;
     customMarker();
+    fetchInitialLocationPoints();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await fetchLocationUpdates();
       setMarkers();
     });
   }
 
-  Future<void> customMarker() async {
-    BitmapDescriptor.asset(
-      const ImageConfiguration(),
-      "assets/ic_pick.png",
-      width: 40,
-      height: 40,
-    ).then((icon) {
-      setState(() {
-        customIcon = icon;
-      });
+  Future<void> fetchInitialLocationPoints() async {
+    final pointsList =
+        await _repository.getInitialPoints(currentPosition ?? myLoc);
+
+    if (pointsList.isEmpty && !_dialogShown) {
+      _showNoInfoDialog();
+      return;
+    }
+
+    updatePoints(pointsList);
+
+    final connectivityResult = await Connectivity().checkConnectivity();
+    if ((connectivityResult != ConnectivityResult.wifi &&
+            connectivityResult != ConnectivityResult.mobile) &&
+        !_dialogShown) {
+      final isConnected = await _hasInternetConnection();
+
+      if (!isConnected) {
+        print("NO WIFI OR CELLULAR");
+        _showNoWifiDialog();
+      }
+    }
+  }
+
+  Future<bool> _hasInternetConnection() async {
+    try {
+      final result = await InternetAddress.lookup('example.com');
+      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  void updatePoints(List<LocationPoint> pointsList) {
+    setState(() {
+      points = pointsList;
+      filteredPoints = points;
+      setMarkers();
     });
+  }
+
+  void _showNoWifiDialog() {
+    _dialogShown = true;
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Text(
+            'Offline',
+            style: GoogleFonts.montserrat(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          content: Text(
+            'You are not connected to Wi-Fi. A default map will be displayed.',
+            style: GoogleFonts.montserrat(
+              color: Colors.black54,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          actions: [
+            Center(
+              child: TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                style: TextButton.styleFrom(
+                  backgroundColor: SustainUColors.limeGreen,
+                  minimumSize: const Size(200, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: Text(
+                  'OK',
+                  style: GoogleFonts.montserrat(
+                    color: Colors.white,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showNoInfoDialog() {
+    _dialogShown = true;
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Text(
+            'Offline',
+            style: GoogleFonts.montserrat(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          content: Text(
+            'You are not connected to Wi-Fi. Points have not been fetched before, please connect to WiFi to get the green points.',
+            style: GoogleFonts.montserrat(
+              color: Colors.black54,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          actions: [
+            Center(
+              child: TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                style: TextButton.styleFrom(
+                  backgroundColor: SustainUColors.limeGreen,
+                  minimumSize: const Size(200, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: Text(
+                  'OK',
+                  style: GoogleFonts.montserrat(
+                    color: Colors.white,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> customMarker() async {
+    customIcon = await BitmapDescriptor.asset(
+        ImageConfiguration(size: Size(40, 40)), "assets/ic_pick.png");
   }
 
   void setMarkers() {
@@ -61,22 +209,41 @@ class _GoogleMapsState extends State<GoogleMaps> {
           position: point.position,
           icon: customIcon,
           onTap: () async {
-            await _firestoreService.incrementPointCount(point.name);
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => GreenPoints(
-                  imagePath: "assets/canecaML.png",
-                  title: point.name,
-                  description: point.description,
-                  categories: const [
-                    'Disposables',
-                    'Non disposables',
-                    'Organic',
-                  ],
+            if (isNavigating) return;
+
+            isNavigating = true;
+            final connectivityResult = await Connectivity().checkConnectivity();
+
+            try {
+              if (connectivityResult == ConnectivityResult.wifi ||
+                  connectivityResult == ConnectivityResult.mobile) {
+                await _firestoreService.incrementPointCount(point.name);
+              } else {
+                print("Offline - unable to increment point count.");
+              }
+
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => GreenPoints(
+                    imagePath: point.imgUrl,
+                    title: point.name,
+                    description: point.description,
+                    categories: const [
+                      'Disposables',
+                      'Non disposables',
+                      'Organic',
+                    ],
+                  ),
                 ),
-              ),
-            );
+              );
+            } catch (e) {
+              print("Error during navigation or incrementing count: $e");
+            } finally {
+              setState(() {
+                isNavigating = false;
+              });
+            }
           },
         ),
       );
@@ -85,7 +252,8 @@ class _GoogleMapsState extends State<GoogleMaps> {
 
   void _filterSearchResults(String query) {
     setState(() {
-      filteredPoints = query.isEmpty ? points : _repository.filterPoints(query);
+      filteredPoints =
+          query.isEmpty ? points : _repository.filterPoints(points, query);
     });
   }
 
@@ -102,21 +270,28 @@ class _GoogleMapsState extends State<GoogleMaps> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       body: Stack(
         children: [
-          GoogleMap(
-            initialCameraPosition:
-                CameraPosition(target: currentPosition ?? myLoc, zoom: 17),
-            markers: markers,
-            onMapCreated: (GoogleMapController controller) {
-              _mapController = controller;
-              _moveCameraToCurrentPosition();
-            },
-            myLocationEnabled: true,
+          SizedBox(
+            height: screenHeight * 0.65,
+            child: GoogleMap(
+              initialCameraPosition:
+                  CameraPosition(target: currentPosition ?? myLoc, zoom: 16),
+              markers: markers,
+              onMapCreated: (GoogleMapController controller) {
+                _mapController = controller;
+                _moveCameraToCurrentPosition();
+              },
+              myLocationEnabled: true,
+            ),
           ),
-          Padding(
-            padding: const EdgeInsets.only(top: 30.0, left: 16.0, right: 16.0),
+          Positioned(
+            top: 36.0,
+            left: 16.0,
+            right: 16.0,
             child: HeaderWidget(),
           ),
           DraggableScrollableSheet(
@@ -246,23 +421,47 @@ class _GoogleMapsState extends State<GoogleMaps> {
                                 ],
                               ),
                               onTap: () async {
-                                await _firestoreService
-                                    .incrementPointCount(point.name);
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => GreenPoints(
-                                      imagePath: "assets/canecaML.png",
-                                      title: point.name,
-                                      description: point.description,
-                                      categories: const [
-                                        'Disposables',
-                                        'Non disposables',
-                                        'Organic'
-                                      ],
+                                if (isNavigating) return;
+
+                                isNavigating = true;
+                                final connectivityResult =
+                                    await Connectivity().checkConnectivity();
+
+                                try {
+                                  if (connectivityResult ==
+                                          ConnectivityResult.wifi ||
+                                      connectivityResult ==
+                                          ConnectivityResult.mobile) {
+                                    await _firestoreService
+                                        .incrementPointCount(point.name);
+                                  } else {
+                                    print(
+                                        "Offline - unable to increment point count.");
+                                  }
+
+                                  await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => GreenPoints(
+                                        imagePath: point.imgUrl,
+                                        title: point.name,
+                                        description: point.description,
+                                        categories: const [
+                                          'Disposables',
+                                          'Non disposables',
+                                          'Organic',
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                );
+                                  );
+                                } catch (e) {
+                                  print(
+                                      "Error during navigation or incrementing count: $e");
+                                } finally {
+                                  setState(() {
+                                    isNavigating = false;
+                                  });
+                                }
                               },
                             ),
                           );
@@ -304,6 +503,7 @@ class _GoogleMapsState extends State<GoogleMaps> {
             currentLocation.latitude!,
             currentLocation.longitude!,
           );
+          fetchInitialLocationPoints();
         });
       }
     });

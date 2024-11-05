@@ -37,9 +37,16 @@ class GreenPoints extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
-              child: Image.asset(
+              child: Image.network(
                 imagePath,
                 width: 400,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Text('Image not available');
+                },
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return const CircularProgressIndicator();
+                },
               ),
             ),
             Text(

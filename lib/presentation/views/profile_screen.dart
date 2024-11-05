@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:auth0_flutter/auth0_flutter.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import '../../core/utils/sustainu_colors.dart';
 import '../../data/services/storage_service.dart';
-import 'package:auth0_flutter/auth0_flutter.dart';
-
 
 class UserProfile {
   final String nickname;
@@ -45,6 +45,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  bool _isConnected = true;
   final StorageService _storageService = StorageService();
   final Auth0 auth0 = Auth0(
     'dev-0jbbiqg2ogpddh7c.us.auth0.com',
@@ -52,16 +53,43 @@ class _ProfileScreenState extends State<ProfileScreen> {
   );
 
   late Future<UserProfile> _userProfile;
+  late Connectivity _connectivity;
 
   @override
   void initState() {
     super.initState();
-    // Utilizando la fábrica para cargar el perfil
+    // Set up connectivity
+    _connectivity = Connectivity();
+    _checkInternetConnection();
+    _connectivity.onConnectivityChanged.listen((ConnectivityResult result) {
+      _updateConnectionStatus(result);
+    });
+
+    // Load the user profile using the factory
     ProfileFactory profileFactory = StorageProfileFactory(_storageService);
     _userProfile = profileFactory.createProfile();
   }
 
+  void _updateConnectionStatus(ConnectivityResult result) {
+    bool connected = result == ConnectivityResult.mobile || result == ConnectivityResult.wifi;
+    setState(() {
+      _isConnected = connected;
+    });
+  }
+
+  Future<void> _checkInternetConnection() async {
+    var connectivityResult = await _connectivity.checkConnectivity();
+    _updateConnectionStatus(connectivityResult);
+  }
+
   Future<void> logoutAction(BuildContext context) async {
+    if (!_isConnected) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('No internet connection. Please try again.')),
+      );
+      return;
+    }
+
     try {
       await _storageService.clearUserData();
       await auth0.webAuthentication(scheme: 'flutter.sustainu').logout();
@@ -142,11 +170,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   SizedBox(height: 40),
                   ElevatedButton.icon(
-                    onPressed: () {
-                      logoutAction(context);
-                    },
+                    onPressed: _isConnected ? () => logoutAction(context) : null,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: SustainUColors.coralOrange,
+                      backgroundColor: _isConnected ? SustainUColors.coralOrange : Colors.grey,
                       padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
@@ -161,6 +187,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                   ),
+                  if (!_isConnected) ...[
+                    SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: _checkInternetConnection,
+                      child: Text('Retry', style: TextStyle(color: Colors.white)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange,
+                        padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      'No Internet Connection, To Logout Please Connect To Inernet',
+                      style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                    ),
+                  ],
                 ],
               ),
             ),

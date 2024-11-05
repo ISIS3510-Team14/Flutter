@@ -1,9 +1,13 @@
+import 'dart:async'; // Add this import
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:connectivity_plus/connectivity_plus.dart'; // Importing connectivity package
 import '../../core/utils/sustainu_colors.dart';
 import '../widgets/head.dart';
 import '../widgets/bottom_navbar.dart';
 import '../../data/services/storage_service.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -13,18 +17,192 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   String _name = 'User';
   final StorageService _storageService = StorageService();
+  bool _isConnected = true; // Track internet connection status
+  late Connectivity _connectivity;
+  late Stream<ConnectivityResult> _connectivityStream; // Store connectivity stream
+  List<File> _tempImages = [];
+  StreamSubscription<ConnectivityResult>? _connectivitySubscription; // Subscription for connectivity changes
 
   @override
   void initState() {
     super.initState();
+    _connectivity = Connectivity();
+    _connectivityStream = _connectivity.onConnectivityChanged;
+    _checkInternetConnection();
+
+    // Listen to connectivity changes only while on HomeScreen
+    _connectivitySubscription = _connectivityStream.listen((ConnectivityResult result) {
+      _updateConnectionStatus(result);
+    });
+
     _loadUserProfile();
+    _loadTemporaryImages(); // Now handles showing dialog internally
+  }
+
+  @override
+  void dispose() {
+    // Cancel connectivity listener when leaving HomeScreen
+    _connectivitySubscription?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadUserProfile() async {
-    Map<String, dynamic>? credentials = await _storageService.getUserCredentials();
+    Map<String, dynamic>? credentials =
+        await _storageService.getUserCredentials();
     setState(() {
       _name = credentials?['nickname'] ?? 'User';
     });
+  }
+
+  Future<void> _checkInternetConnection() async {
+    var connectivityResult = await Connectivity().checkConnectivity();
+    _updateConnectionStatus(connectivityResult);
+  }
+
+  void _updateConnectionStatus(ConnectivityResult result) {
+    bool connected = result == ConnectivityResult.mobile ||
+        result == ConnectivityResult.wifi;
+
+    if (!connected && _isConnected) {
+      _showNoInternetDialog(); // Show dialog if connection is lost
+    }
+
+    setState(() {
+      _isConnected = connected;
+    });
+  }
+
+  void _showNoInternetDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.0),
+          ),
+          backgroundColor: Colors.white,
+          title: Center(
+            child: Text(
+              'Offline',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'You are not connected to Wi-Fi.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[700],
+                ),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _checkInternetConnection();
+                },
+                child: Text(
+                  'OK',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: SustainUColors.limeGreen,
+                  minimumSize: Size(100, 40),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<List<File>> _loadTemporaryImages() async {
+    final directory = await getTemporaryDirectory();
+    print(directory.path);
+    final tempImages = Directory(directory.path);
+    List<File> images = [];
+
+    if (await tempImages.exists()) {
+      // List all files in the directory
+      final items = tempImages.listSync();
+      images = items.whereType<File>().toList(); // Ensure we only get files
+    }
+
+    // Check for internet connection
+    bool hasInternet = _isConnected;
+    if (hasInternet) {
+      if (images.isNotEmpty) {
+        _showImageDialog(images);
+      } else {
+        _showNoImagesDialog(); // Show popup if no images are found
+      }
+    }
+
+    return images; // Return the loaded images
+  }
+
+  void _showNoImagesDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('No Temporary Images'),
+          content: Text('No temporary images are available at the moment.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showImageDialog(List<File> images) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Temporary Images Loaded'),
+          content:
+              Text('You have images available. Would you like to view them?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+                Navigator.pushNamed(context, '/viewImages', arguments: images);
+              },
+              child: Text('View Images'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -50,7 +228,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             SizedBox(height: 10),
-            
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
@@ -92,8 +269,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             SizedBox(height: 10),
-
-            // GridView to display buttons with local SVG assets
             GridView.count(
               crossAxisCount: 2,
               childAspectRatio: 1.2,
@@ -122,7 +297,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 _buildFlatButton(
                   'History',
-                  Icons.calendar_month, 
+                  Icons.calendar_month,
                   SustainUColors.limeGreen,
                   '/history',
                 ),
@@ -147,7 +322,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                     child: Text(
                       'Scan',
-                      style: TextStyle(color: Colors.white, fontFamily: 'Montserrat'),
+                      style: TextStyle(
+                          color: Colors.white, fontFamily: 'Montserrat'),
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: SustainUColors.limeGreen,
@@ -163,10 +339,11 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildFlatButton(String label, dynamic icon, Color color, String route) {
+  Widget _buildFlatButton(
+      String label, dynamic icon, Color color, String route) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white, 
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
       ),
       child: InkWell(
@@ -179,7 +356,7 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               icon is String
-                  ? SvgPicture.asset( // Carga el archivo desde assets
+                  ? SvgPicture.asset(
                       icon,
                       height: 40,
                       colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
