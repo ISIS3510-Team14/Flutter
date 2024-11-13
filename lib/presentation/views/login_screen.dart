@@ -103,16 +103,16 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: SustainUColors.background,
-      body: SingleChildScrollView(  // Added SingleChildScrollView to allow scrolling
+      body: SingleChildScrollView(  
         child: Center(
           child: Padding(
-            padding: const EdgeInsets.all(16.0),  // Added padding for better layout on small screens
+            padding: const EdgeInsets.all(16.0),  
             child: _isLoading
                 ? CircularProgressIndicator()
                 : Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      SizedBox(height: 60), // Added space at the top
+                      SizedBox(height: 60), 
                       Image.asset(
                         'assets/img.png',
                         height: 250,
@@ -142,18 +142,18 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       if (!_isConnected) ...[
-                        SizedBox(height: 20),
-                        ElevatedButton(
-                          onPressed: _checkInternetConnection,
-                          child: Text('Retry', style: TextStyle(color: Colors.white)),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange,
-                            minimumSize: Size(220, 60),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15.0),
-                            ),
-                          ),
-                        ),
+                        // SizedBox(height: 20),
+                        // ElevatedButton(
+                        //   onPressed: _checkInternetConnection,
+                        //   child: Text('Retry', style: TextStyle(color: Colors.white)),
+                        //   style: ElevatedButton.styleFrom(
+                        //     backgroundColor: Colors.orange,
+                        //     minimumSize: Size(220, 60),
+                        //     shape: RoundedRectangleBorder(
+                        //       borderRadius: BorderRadius.circular(15.0),
+                        //     ),
+                        //   ),
+                        // ),
                         SizedBox(height: 10),
                         Text(
                           'No Internet Connection, To Login/Sign up Please Connect To Internet',
