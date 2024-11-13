@@ -8,6 +8,7 @@ import '../widgets/bottom_navbar.dart';
 import '../../data/services/storage_service.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -140,9 +141,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (await tempImages.exists()) {
       // List all files in the directory
-      final items = tempImages.listSync();
-      images = items.whereType<File>().toList(); // Ensure we only get files
+      final List<FileSystemEntity> allFiles = tempImages.listSync();
+
+      // Filter the files to include only those with image extensions
+      images = allFiles.whereType<File>().where((file) {
+        final ext = path.extension(file.path).toLowerCase();
+        return ['.jpg', '.jpeg', '.png', '.gif'].contains(ext);
+      }).toList();
     }
+
 
     // Check for internet connection
     bool hasInternet = _isConnected;
