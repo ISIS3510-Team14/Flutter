@@ -6,6 +6,9 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:label="sustain_u"
@@ -40,11 +43,18 @@
             </intent-filter>
         </activity>
 
-        <!-- Firebase Messaging Service with tools:replace attribute -->
+        <!-- Firebase Messaging Service -->
         <service
             android:name="com.google.firebase.messaging.FirebaseMessagingService"
             android:exported="true"
             tools:replace="android:exported" />
+
+        <!-- Receiver for boot and package replacement events -->
+        <receiver 
+            android:name="com.google.firebase.iid.FirebaseInstanceIdReceiver"
+            android:exported="true"
+            android:permission="com.google.android.c2dm.permission.RECEIVE"
+            tools:replace="android:permission" />
 
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
@@ -52,10 +62,10 @@
             android:name="flutterEmbedding"
             android:value="2" />
         <meta-data android:name="com.google.android.geo.API_KEY"
-             android:value="AIzaSyCVOktOnLemhOvmtbN4FUXnMBLf9rMMaf8"/>
+             android:value="AIzaSyAjEhIok7UPo03ia_atEiHguI0OqNXcorI"/>
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
-            android:value="default_channel_id"/>
+            android:value="recycle_reminder_channel" />
     </application>
 
     <queries>

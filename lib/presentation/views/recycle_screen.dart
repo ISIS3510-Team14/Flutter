@@ -26,7 +26,7 @@ class _RecycleScreenState extends State<RecycleScreen> {
 
   @override
   void dispose() {
-    _connectivity.onConnectivityChanged.drain(); // Stop listening when leaving RecycleScreen
+    _connectivity.onConnectivityChanged.drain(); 
     super.dispose();
   }
 
@@ -39,7 +39,7 @@ class _RecycleScreenState extends State<RecycleScreen> {
     bool connected = result == ConnectivityResult.mobile || result == ConnectivityResult.wifi;
 
     if (!connected && _isConnected) {
-      _showNoInternetNotification(); // Show snackbar only on RecycleScreen
+      _showNoInternetNotification(); 
     }
 
     setState(() {
