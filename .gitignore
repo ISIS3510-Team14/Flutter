@@ -52,3 +52,4 @@ android/app/main/AndroidManifest.xml
 
 pubspec.lock
 android/app/google-services.json
+android/app/src/main/res/values/key.xml
