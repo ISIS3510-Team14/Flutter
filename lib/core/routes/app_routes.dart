@@ -5,6 +5,8 @@ import 'package:sustain_u/presentation/views/map.dart';
 import 'package:sustain_u/presentation/views/profile_screen.dart';
 import 'package:sustain_u/presentation/views/recycle/metal_screen.dart';
 import 'package:sustain_u/presentation/views/recycle/glass_screen.dart';
+import 'package:sustain_u/presentation/views/recycle/organic_screen.dart';
+import 'package:sustain_u/presentation/views/recycle/other_screen.dart';
 import 'package:sustain_u/presentation/views/recycle/paper_screen.dart';
 import 'package:sustain_u/presentation/views/recycle/plastic_screen.dart';
 import 'package:sustain_u/presentation/views/recycle_screen.dart';
@@ -34,6 +36,8 @@ class AppRoutes {
     '/metal': (context) => MetalScreen(),
     '/glass': (context) => GlassScreen(),
     '/viewImages': (context) => ViewImagesScreen(),
+    '/others': (context) => OtherScreen(),
+    '/organic': (context) => OrganicScreen(),
     };
   }
 }

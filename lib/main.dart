@@ -7,10 +7,15 @@ import 'firebase_options.dart';
 import 'package:camera/camera.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:sustain_u/data/services/notification_service.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
-const appScheme = 'flutter.sustainu';
 
-void main() async {
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  print("Mensaje en background: ${message.notification?.title}");
+}
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final cameras = await availableCameras();
@@ -19,6 +24,9 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   runApp(MyApp(camera: firstCamera));
 }
@@ -47,9 +55,6 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> _initializeNotificationService() async {
     await _notificationService.initialize();
-    // Schedule notifications if needed
-    await _notificationService.scheduleDailyRecycleReminder();
-    await _notificationService.scheduleEndOfDayReminder();
   }
 
   @override
@@ -65,18 +70,6 @@ class _MyAppState extends State<MyApp> {
           displayLarge: TextStyle(
             fontFamily: 'Montserrat',
             fontSize: 32,
-            fontWeight: FontWeight.bold,
-            color: SustainUColors.text,
-          ),
-          displayMedium: TextStyle(
-            fontFamily: 'Montserrat',
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: SustainUColors.text,
-          ),
-          displaySmall: TextStyle(
-            fontFamily: 'Montserrat',
-            fontSize: 24,
             fontWeight: FontWeight.bold,
             color: SustainUColors.text,
           ),

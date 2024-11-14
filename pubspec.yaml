@@ -95,6 +95,10 @@ flutter:
   - assets/plastic.png
   - assets/trash_blue.png
   - assets/trash_grey.png
+  - assets/trash_green.png
+  - assets/trash_yellow.png
+  - assets/organic.png
+  - assets/other.png
     #-ic_pick.png
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

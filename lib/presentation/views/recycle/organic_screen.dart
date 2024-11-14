@@ -3,7 +3,7 @@ import '../../../core/utils/sustainu_colors.dart';
 import '../../widgets/head.dart';
 import '../../widgets/bottom_navbar.dart';
 
-class PaperScreen extends StatelessWidget {
+class OrganicScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,7 +28,7 @@ class PaperScreen extends StatelessWidget {
                 ),
                 SizedBox(width: 8),
                 Text(
-                  'Paper',
+                  'Organic',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -37,7 +37,7 @@ class PaperScreen extends StatelessWidget {
                 ),
                 SizedBox(width: 5),
                 Image.asset(
-                  'assets/paper.png',
+                  'assets/organic.png',
                   height: 30,
                   width: 30,
                 ),
@@ -54,7 +54,7 @@ class PaperScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
-                  'Recycling one ton of paper saves 17 trees.',
+                  'Organic waste decomposes naturally, reducing landfill waste.',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
@@ -71,7 +71,7 @@ class PaperScreen extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    'Paper is most of the time thrown in the gray trash can',
+                    'Organic is most of the time thrown in the green trash can',
                     style: TextStyle(
                       fontSize: 16,
                       color: SustainUColors.text,
@@ -81,7 +81,7 @@ class PaperScreen extends StatelessWidget {
                 ),
                 SizedBox(width: 16),
                 Image.asset(
-                  'assets/trash_grey.png',
+                  'assets/trash_green.png',
                   height: 100,
                 ),
               ],
@@ -93,7 +93,7 @@ class PaperScreen extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: Text(
-                  'If you can you might want to remove any contaminants like plastic windows from envelopes before recycling.',
+                  'Includes food scraps, fruit peels, coffee grounds, yard trimmings, and other biodegradable materials.',
                   style: TextStyle(
                     fontSize: 16,
                     color: SustainUColors.text,

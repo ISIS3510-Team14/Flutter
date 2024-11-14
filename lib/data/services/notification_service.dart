@@ -1,130 +1,89 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:timezone/timezone.dart' as tz;
+//import 'package:flutter/material.dart';
 
 class NotificationService {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin _localNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
-  static const String defaultChannelId = 'recycle_reminder_channel';
+  late final AndroidNotificationChannel channel;
 
   Future<void> initialize() async {
-    
-    await _firebaseMessaging.requestPermission();
-    print("Notification permissions requested.");
+    // Solicita permisos de notificaciones
+    NotificationSettings settings = await _firebaseMessaging.requestPermission();
+    print("Permisos de notificación: ${settings.authorizationStatus}");
 
-    
+    // Obtén y muestra el token FCM
     String? token = await _firebaseMessaging.getToken();
-    print("FCM Token: $token");
+    print("Token FCM: $token");
 
-    
-    const AndroidNotificationChannel channel = AndroidNotificationChannel(
-      defaultChannelId, 
-      'Recycle Reminders', 
+    // Configura el canal de notificaciones para Android
+    channel = const AndroidNotificationChannel(
+      'recycle_reminder_channel',
+      'Recycle Reminders',
       description: 'Notifications to remind about recycling',
       importance: Importance.high,
     );
 
     await _localNotificationsPlugin
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(channel);
-    print("Notification channel created.");
 
-    // Initialize local notifications
+    // Inicialización para Android e iOS
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
-    const InitializationSettings initializationSettings =
-        InitializationSettings(android: initializationSettingsAndroid);
+    const DarwinInitializationSettings initializationSettingsIOS =
+        DarwinInitializationSettings();
+    const InitializationSettings initializationSettings = InitializationSettings(
+      android: initializationSettingsAndroid,
+      iOS: initializationSettingsIOS,
+    );
 
-    await _localNotificationsPlugin.initialize(initializationSettings);
-    print("Local notifications plugin initialized.");
+    await _localNotificationsPlugin.initialize(initializationSettings,
+        onDidReceiveNotificationResponse: (details) {
+      print("Notificación pulsada: ${details.payload}");
+      // Navega o ejecuta lógica si es necesario
+    });
 
-    
+    // Escucha notificaciones en foreground
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      _showNotification(
-        message.notification?.title ?? 'No Title',
-        message.notification?.body ?? 'No Body',
+      print("Mensaje recibido en foreground: ${message.notification?.title}");
+      showNotification(
+        message.notification?.title ?? 'Sin título',
+        message.notification?.body ?? 'Sin contenido',
       );
     });
-    print("Foreground message listener set up.");
+
+    // Maneja mensajes en background
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+    // Maneja mensajes cuando se hace clic desde la bandeja
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      print("Notificación abierta: ${message.notification?.title}");
+      // Navega a una pantalla específica si es necesario
+    });
   }
 
-  Future<void> _showNotification(String title, String body) async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-        AndroidNotificationDetails(
-      defaultChannelId, 
-      'Recycle Reminders', 
-      channelDescription: 'Notifications to remind about recycling',
-      importance: Importance.max,
+  static Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+    print("Mensaje recibido en background: ${message.notification?.title}");
+  }
+
+  Future<void> showNotification(String title, String body) async {
+    final AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+      channel.id,
+      channel.name,
+      channelDescription: channel.description,
+      importance: Importance.high,
       priority: Priority.high,
     );
-    const NotificationDetails platformChannelSpecifics =
-        NotificationDetails(android: androidPlatformChannelSpecifics);
 
-    await _localNotificationsPlugin.show(
-      0, 
-      title,
-      body,
-      platformChannelSpecifics,
+    NotificationDetails notificationDetails = NotificationDetails(
+      android: androidDetails,
+      iOS: const DarwinNotificationDetails(),
     );
-    print("Notification shown with title: $title and body: $body");
-  }
 
-  Future<void> scheduleDailyRecycleReminder() async {
-    await _localNotificationsPlugin.zonedSchedule(
-      1,
-      'Time to Recycle!',
-      'Don’t forget to recycle today.',
-      _nextInstanceOfTime(10, 0),
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          defaultChannelId,
-          'Daily Recycle Reminder',
-          channelDescription: 'Daily reminder to recycle',
-          importance: Importance.max,
-          priority: Priority.high,
-        ),
-      ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.wallClockTime,
-      matchDateTimeComponents: DateTimeComponents.time,
-    );
-    print("Daily recycle reminder scheduled.");
-  }
-
-  Future<void> scheduleEndOfDayReminder() async {
-    await _localNotificationsPlugin.zonedSchedule(
-      2,
-      'End of Day Reminder',
-      'Don’t lose your recycling streak!',
-      _nextInstanceOfTime(20, 0),
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          defaultChannelId,
-          'End of Day Reminder',
-          channelDescription: 'Reminder at the end of the day',
-          importance: Importance.max,
-          priority: Priority.high,
-        ),
-      ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.wallClockTime,
-      matchDateTimeComponents: DateTimeComponents.time,
-    );
-    print("End of day reminder scheduled.");
-  }
-
-  tz.TZDateTime _nextInstanceOfTime(int hour, int minute) {
-    final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
-    tz.TZDateTime scheduledDate =
-        tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
-    if (scheduledDate.isBefore(now)) {
-      scheduledDate = scheduledDate.add(const Duration(days: 1));
-    }
-    return scheduledDate;
+    await _localNotificationsPlugin.show(0, title, body, notificationDetails);
+    print("Notificación mostrada: $title - $body");
   }
 }
