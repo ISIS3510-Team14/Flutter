@@ -20,14 +20,41 @@ class FirestoreService {
     }
   }
 
-  Future<void> incrementMapAccessCount(String pointName) async {
+  Future<void> incrementMapAccessCount(String way) async {
     var collection = _db.collection('eventdb');
     var snapshot =
         await collection.where('name', isEqualTo: 'MapView').limit(1).get();
+
     if (snapshot.docs.isNotEmpty) {
       var doc = snapshot.docs.first;
+
       int currentCount = doc['count'] as int;
-      await doc.reference.update({'count': currentCount + 1});
+      int currentHour = DateTime.now().hour;
+      print('HORA $currentHour');
+      String hourField = '$currentHour';
+
+      int currentHourAccess = doc[hourField] as int? ?? 0;
+
+      String? fieldToIncrement;
+      if (way == "nav") {
+        fieldToIncrement = 'NavBar';
+      } else if (way == "home") {
+        fieldToIncrement = 'MainMenu';
+      } else {
+        fieldToIncrement = null;
+      }
+
+      Map<String, dynamic> updates = {
+        'count': currentCount + 1,
+        hourField: currentHourAccess + 1,
+      };
+
+      if (fieldToIncrement != null) {
+        int currentFieldCount = doc[fieldToIncrement] as int? ?? 0;
+        updates[fieldToIncrement] = currentFieldCount + 1;
+      }
+
+      await doc.reference.update(updates);
     }
   }
 
@@ -46,6 +73,7 @@ class FirestoreService {
           info: data['info2'] ?? '',
           position: LatLng(geoPoint.latitude, geoPoint.longitude),
           imgUrl: data['img'] ?? '',
+          category: data['info3'] ?? '',
         );
       }).toList();
     } catch (e) {
@@ -68,6 +96,7 @@ class FirestoreService {
           info: data['info2'] ?? '',
           position: LatLng(geoPoint.latitude, geoPoint.longitude),
           imgUrl: data['img'] ?? '',
+          category: data['info3'] ?? '',
         );
       }).toList();
     } catch (e) {
