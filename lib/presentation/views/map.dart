@@ -229,11 +229,7 @@ class _GoogleMapsState extends State<GoogleMaps> {
                     imagePath: point.imgUrl,
                     title: point.name,
                     description: point.description,
-                    categories: const [
-                      'Disposables',
-                      'Non disposables',
-                      'Organic',
-                    ],
+                    categories: point.category,
                   ),
                 ),
               );
@@ -446,11 +442,7 @@ class _GoogleMapsState extends State<GoogleMaps> {
                                         imagePath: point.imgUrl,
                                         title: point.name,
                                         description: point.description,
-                                        categories: const [
-                                          'Disposables',
-                                          'Non disposables',
-                                          'Organic',
-                                        ],
+                                        categories: point.category,
                                       ),
                                     ),
                                   );

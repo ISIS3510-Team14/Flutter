@@ -5,47 +5,43 @@ import '../../widgets/head.dart';
 import '../../widgets/bottom_navbar.dart';
 import 'package:sustain_u/main.dart';
 
-class PaperScreen extends StatefulWidget {
+class OrganicScreen extends StatefulWidget {
   @override
-  _PaperScreenState createState() => _PaperScreenState();
+  _OrganicScreenState createState() => _OrganicScreenState();
 }
 
-class _PaperScreenState extends State<PaperScreen> with RouteAware {
+class _OrganicScreenState extends State<OrganicScreen> with RouteAware {
   late int _startTime;
 
   @override
   void initState() {
     super.initState();
     _startTime = DateTime.now().millisecondsSinceEpoch;
-    print("este es el tiempo de inicio $_startTime");
+    print("Este es el tiempo de inicio $_startTime");
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Subscribe to RouteObserver to detect navigation changes
     routeObserver.subscribe(this, ModalRoute.of(context) as PageRoute);
-    print("route observer suscrito!");
+    print("Route observer suscrito!");
   }
 
   @override
   void dispose() {
-    // Unsubscribe from RouteObserver
     routeObserver.unsubscribe(this);
-    print("route observer desuscrito!");
+    print("Route observer desuscrito!");
     int endTime = DateTime.now().millisecondsSinceEpoch;
     int duration = ((endTime - _startTime) / 1000).round();
-    print("este es el tiempo de duracion $duration");
-    logScreenTimeToFirestore(duration, 'paper'); // Log the time to Firestore
+    print("Este es el tiempo de duracion $duration");
+    logScreenTimeToFirestore(duration, 'organic'); // Log the time to Firestore
     super.dispose();
   }
 
-  Future<void> logScreenTimeToFirestore(
-      int durationSeconds, String screenName) async {
+  Future<void> logScreenTimeToFirestore(int durationSeconds, String screenName) async {
     try {
       print("Logging screen time to Firestore...");
-      CollectionReference trashTypes =
-          FirebaseFirestore.instance.collection('trash_screen_times');
+      CollectionReference trashTypes = FirebaseFirestore.instance.collection('trash_screen_times');
       await trashTypes.add({
         'time_spent': durationSeconds,
         'trash_type': screenName,
@@ -69,7 +65,7 @@ class _PaperScreenState extends State<PaperScreen> with RouteAware {
             SizedBox(height: 30),
 
             HeaderWidget(),
-
+            
             Row(
               children: [
                 IconButton(
@@ -80,7 +76,7 @@ class _PaperScreenState extends State<PaperScreen> with RouteAware {
                 ),
                 SizedBox(width: 8),
                 Text(
-                  'Paper',
+                  'Organic',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -89,13 +85,13 @@ class _PaperScreenState extends State<PaperScreen> with RouteAware {
                 ),
                 SizedBox(width: 5),
                 Image.asset(
-                  'assets/paper.png',
+                  'assets/organic.png',
                   height: 30,
                   width: 30,
                 ),
               ],
             ),
-
+            
             SizedBox(height: 20),
 
             Center(
@@ -106,7 +102,7 @@ class _PaperScreenState extends State<PaperScreen> with RouteAware {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
-                  'Recycling one ton of paper saves 17 trees.',
+                  'Organic waste decomposes naturally, reducing landfill waste.',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
@@ -123,7 +119,7 @@ class _PaperScreenState extends State<PaperScreen> with RouteAware {
               children: [
                 Expanded(
                   child: Text(
-                    'Paper is most of the time thrown in the gray trash can',
+                    'Organic is most of the time thrown in the green trash can',
                     style: TextStyle(
                       fontSize: 16,
                       color: SustainUColors.text,
@@ -133,7 +129,7 @@ class _PaperScreenState extends State<PaperScreen> with RouteAware {
                 ),
                 SizedBox(width: 16),
                 Image.asset(
-                  'assets/trash_grey.png',
+                  'assets/trash_green.png',
                   height: 100,
                 ),
               ],
@@ -145,7 +141,7 @@ class _PaperScreenState extends State<PaperScreen> with RouteAware {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: Text(
-                  'If you can you might want to remove any contaminants like plastic windows from envelopes before recycling.',
+                  'Includes food scraps, fruit peels, coffee grounds, yard trimmings, and other biodegradable materials.',
                   style: TextStyle(
                     fontSize: 16,
                     color: SustainUColors.text,

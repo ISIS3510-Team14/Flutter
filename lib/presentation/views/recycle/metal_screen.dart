@@ -1,9 +1,58 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../../../core/utils/sustainu_colors.dart';
 import '../../widgets/head.dart';
 import '../../widgets/bottom_navbar.dart';
+import 'package:sustain_u/main.dart';
 
-class MetalScreen extends StatelessWidget {
+
+class MetalScreen extends StatefulWidget {
+  @override
+  _MetalScreenState createState() => _MetalScreenState();
+}
+
+class _MetalScreenState extends State<MetalScreen> with RouteAware {
+  late int _startTime;
+
+  @override
+  void initState() {
+    super.initState();
+    _startTime = DateTime.now().millisecondsSinceEpoch;
+    print("Este es el tiempo de inicio $_startTime");
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context) as PageRoute);
+    print("Route observer suscrito!");
+  }
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    print("Route observer desuscrito!");
+    int endTime = DateTime.now().millisecondsSinceEpoch;
+    int duration = ((endTime - _startTime) / 1000).round();
+    print("Este es el tiempo de duracion $duration");
+    logScreenTimeToFirestore(duration, 'metal'); // Log the time to Firestore
+    super.dispose();
+  }
+
+  Future<void> logScreenTimeToFirestore(int durationSeconds, String screenName) async {
+    try {
+      print("Logging screen time to Firestore...");
+      CollectionReference trashTypes = FirebaseFirestore.instance.collection('trash_screen_times');
+      await trashTypes.add({
+        'time_spent': durationSeconds,
+        'trash_type': screenName,
+        'timestamp': Timestamp.now(),
+      });
+    } catch (e) {
+      print("Error logging screen time to Firestore: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,10 +92,8 @@ class MetalScreen extends StatelessWidget {
               ],
             ),
             
-            
             SizedBox(height: 20),
 
-            
             Center(
               child: Container(
                 padding: const EdgeInsets.all(16.0),
@@ -67,7 +114,6 @@ class MetalScreen extends StatelessWidget {
             ),
             SizedBox(height: 20),
 
-            
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -90,7 +136,6 @@ class MetalScreen extends StatelessWidget {
             ),
             SizedBox(height: 20),
 
-            
             Center(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),

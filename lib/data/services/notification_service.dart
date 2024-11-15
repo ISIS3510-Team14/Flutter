@@ -1,6 +1,7 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
+
 class NotificationService {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin _localNotificationsPlugin =
@@ -13,7 +14,7 @@ class NotificationService {
     NotificationSettings settings = await _firebaseMessaging.requestPermission();
     print("Permisos de notificación: ${settings.authorizationStatus}");
 
- 
+   
     String? token = await _firebaseMessaging.getToken();
     print("Token FCM: $token");
 
@@ -29,7 +30,7 @@ class NotificationService {
         .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(channel);
 
-    
+  
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
     const DarwinInitializationSettings initializationSettingsIOS =
@@ -42,21 +43,30 @@ class NotificationService {
     await _localNotificationsPlugin.initialize(initializationSettings,
         onDidReceiveNotificationResponse: (details) {
       print("Notificación pulsada: ${details.payload}");
+   
     });
 
+ 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print("Mensaje recibido en foreground: ${message.notification?.title}");
       showNotification(
-        message.notification?.title ?? 'No Title',
-        message.notification?.body ?? 'No Body',
+        message.notification?.title ?? 'Sin título',
+        message.notification?.body ?? 'Sin contenido',
       );
     });
 
+   
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+    
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      print("Notificación abierta: ${message.notification?.title}");
+      
+    });
   }
 
-  static Future<void> _firebaseMessagingBackgroundHandler(
-      RemoteMessage message) async {
-    print("Mensaje en background recibido: ${message.notification?.title}");
+  static Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+    print("Mensaje recibido en background: ${message.notification?.title}");
   }
 
   Future<void> showNotification(String title, String body) async {

@@ -2,12 +2,14 @@ import 'dart:async'; // Add this import
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:connectivity_plus/connectivity_plus.dart'; // Importing connectivity package
+import 'package:sustain_u/data/services/firestore_service.dart';
 import '../../core/utils/sustainu_colors.dart';
 import '../widgets/head.dart';
 import '../widgets/bottom_navbar.dart';
 import '../../data/services/storage_service.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -19,9 +21,12 @@ class _HomeScreenState extends State<HomeScreen> {
   final StorageService _storageService = StorageService();
   bool _isConnected = true; // Track internet connection status
   late Connectivity _connectivity;
-  late Stream<ConnectivityResult> _connectivityStream; // Store connectivity stream
+  late Stream<ConnectivityResult>
+      _connectivityStream; // Store connectivity stream
   List<File> _tempImages = [];
-  StreamSubscription<ConnectivityResult>? _connectivitySubscription; // Subscription for connectivity changes
+  StreamSubscription<ConnectivityResult>?
+      _connectivitySubscription; // Subscription for connectivity changes
+  final FirestoreService _firestoreService = FirestoreService();
 
   @override
   void initState() {
@@ -31,7 +36,8 @@ class _HomeScreenState extends State<HomeScreen> {
     _checkInternetConnection();
 
     // Listen to connectivity changes only while on HomeScreen
-    _connectivitySubscription = _connectivityStream.listen((ConnectivityResult result) {
+    _connectivitySubscription =
+        _connectivityStream.listen((ConnectivityResult result) {
       _updateConnectionStatus(result);
     });
 
@@ -140,8 +146,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (await tempImages.exists()) {
       // List all files in the directory
-      final items = tempImages.listSync();
-      images = items.whereType<File>().toList(); // Ensure we only get files
+      final List<FileSystemEntity> allFiles = tempImages.listSync();
+
+      // Filter the files to include only those with image extensions
+      images = allFiles.whereType<File>().where((file) {
+        final ext = path.extension(file.path).toLowerCase();
+        return ['.jpg', '.jpeg', '.png', '.gif'].contains(ext);
+      }).toList();
     }
 
     // Check for internet connection
@@ -348,6 +359,9 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       child: InkWell(
         onTap: () {
+          if (route == '/map') {
+            _firestoreService.incrementMapAccessCount("home");
+          }
           Navigator.pushNamed(context, route);
         },
         child: Padding(

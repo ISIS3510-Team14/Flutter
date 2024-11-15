@@ -4,9 +4,16 @@ class GreenPoints extends StatelessWidget {
   final String imagePath;
   final String title;
   final String description;
-  final List<String> categories;
+  final List<dynamic> categories;
+  final Map<String, String> categoryRoutes = {
+    'Paper': '/paper',
+    'Glass': '/glass',
+    'Organic': '/organic',
+    'Metal': '/metal',
+    'Other': '/other',
+  };
 
-  const GreenPoints({
+  GreenPoints({
     Key? key,
     required this.imagePath,
     required this.title,
@@ -67,7 +74,14 @@ class GreenPoints extends StatelessWidget {
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4.0),
                   child: GestureDetector(
-                    onTap: () {},
+                    onTap: () {
+                      final route = categoryRoutes[category];
+                      if (route != null) {
+                        Navigator.pushNamed(context, route);
+                      } else {
+                        print('No route defined for $category');
+                      }
+                    },
                     child: Text(
                       category,
                       style: const TextStyle(
@@ -78,7 +92,7 @@ class GreenPoints extends StatelessWidget {
                   ),
                 );
               }).toList(),
-            ),
+            )
           ],
         ),
       ),

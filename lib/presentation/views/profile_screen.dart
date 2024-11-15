@@ -65,7 +65,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _updateConnectionStatus(result);
     });
 
-    // Load the user profile using the factory
+    
     ProfileFactory profileFactory = StorageProfileFactory(_storageService);
     _userProfile = profileFactory.createProfile();
   }
@@ -188,18 +188,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
                   if (!_isConnected) ...[
-                    SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: _checkInternetConnection,
-                      child: Text('Retry', style: TextStyle(color: Colors.white)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
-                        padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                      ),
-                    ),
+                    // SizedBox(height: 20),
+                    // ElevatedButton(
+                    //   onPressed: _checkInternetConnection,
+                    //   child: Text('Retry', style: TextStyle(color: Colors.white)),
+                    //   style: ElevatedButton.styleFrom(
+                    //     backgroundColor: Colors.orange,
+                    //     padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                    //     shape: RoundedRectangleBorder(
+                    //       borderRadius: BorderRadius.circular(30),
+                    //     ),
+                    //   ),
+                    // ),
                     SizedBox(height: 10),
                     Text(
                       'No Internet Connection, To Logout Please Connect To Inernet',

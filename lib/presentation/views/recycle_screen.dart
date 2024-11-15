@@ -111,6 +111,16 @@ class _RecycleScreenState extends State<RecycleScreen> {
                   'assets/metal.png',
                   'Cans, utensils',
                 ),
+                _buildCategoryButton(
+                  'Organic',
+                  'assets/organic.png',
+                  'Food waste, biodegradables',
+                ),
+                _buildCategoryButton(
+                  'Others',
+                  'assets/other.png',
+                  'Batteries, dirtywaste',
+                ),
               ],
             ),
             SizedBox(height: 20),
