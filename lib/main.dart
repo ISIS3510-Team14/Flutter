@@ -9,6 +9,7 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:sustain_u/data/services/notification_service.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
+final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
@@ -28,17 +29,18 @@ Future<void> main() async {
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-  runApp(MyApp(camera: firstCamera));
+  runApp(MyApp(camera: firstCamera, navigatorObservers: [routeObserver]));
 }
 
 class MyApp extends StatefulWidget {
   final CameraDescription camera;
+  final List<NavigatorObserver> navigatorObservers;
 
   static FirebaseAnalytics analytics = FirebaseAnalytics.instance;
   static FirebaseAnalyticsObserver observer =
       FirebaseAnalyticsObserver(analytics: analytics);
 
-  const MyApp({required this.camera});
+  const MyApp({required this.camera, required this.navigatorObservers});
 
   @override
   _MyAppState createState() => _MyAppState();

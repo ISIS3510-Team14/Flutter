@@ -1,9 +1,61 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../../../core/utils/sustainu_colors.dart';
 import '../../widgets/head.dart';
 import '../../widgets/bottom_navbar.dart';
+import 'package:sustain_u/main.dart';
 
-class PaperScreen extends StatelessWidget {
+class PaperScreen extends StatefulWidget {
+  @override
+  _PaperScreenState createState() => _PaperScreenState();
+}
+
+class _PaperScreenState extends State<PaperScreen> with RouteAware {
+  late int _startTime;
+
+  @override
+  void initState() {
+    super.initState();
+    _startTime = DateTime.now().millisecondsSinceEpoch;
+    print("este es el tiempo de inicio $_startTime");
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Subscribe to RouteObserver to detect navigation changes
+    routeObserver.subscribe(this, ModalRoute.of(context) as PageRoute);
+    print("route observer suscrito!");
+  }
+
+  @override
+  void dispose() {
+    // Unsubscribe from RouteObserver
+    routeObserver.unsubscribe(this);
+    print("route observer desuscrito!");
+    int endTime = DateTime.now().millisecondsSinceEpoch;
+    int duration = ((endTime - _startTime) / 1000).round();
+    print("este es el tiempo de duracion $duration");
+    logScreenTimeToFirestore(duration, 'paper'); // Log the time to Firestore
+    super.dispose();
+  }
+
+  Future<void> logScreenTimeToFirestore(
+      int durationSeconds, String screenName) async {
+    try {
+      print("Logging screen time to Firestore...");
+      CollectionReference trashTypes =
+          FirebaseFirestore.instance.collection('trash_screen_times');
+      await trashTypes.add({
+        'time_spent': durationSeconds,
+        'trash_type': screenName,
+        'timestamp': Timestamp.now(),
+      });
+    } catch (e) {
+      print("Error logging screen time to Firestore: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -17,7 +69,7 @@ class PaperScreen extends StatelessWidget {
             SizedBox(height: 30),
 
             HeaderWidget(),
-            
+
             Row(
               children: [
                 IconButton(
@@ -43,7 +95,7 @@ class PaperScreen extends StatelessWidget {
                 ),
               ],
             ),
-            
+
             SizedBox(height: 20),
 
             Center(
