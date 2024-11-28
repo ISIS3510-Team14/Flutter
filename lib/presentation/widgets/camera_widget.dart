@@ -1,12 +1,15 @@
 import 'dart:async';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'display_picture_widget.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sustain_u/presentation/widgets/display_picture_widget.dart';
 import '../../core/utils/sustainu_colors.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../data/services/storage_service.dart';
+
 
 class CameraWidget extends StatefulWidget {
   final CameraDescription camera;
@@ -20,8 +23,9 @@ class CameraWidget extends StatefulWidget {
 class CameraWidgetState extends State<CameraWidget> {
   late CameraController _controller;
   late Future<void> _initializeControllerFuture;
-
   bool _isConnected = true;
+  String? userEmail;
+  final StorageService _storageService = StorageService();
 
   @override
   void initState() {
@@ -32,6 +36,10 @@ class CameraWidgetState extends State<CameraWidget> {
     );
     _initializeControllerFuture = _controller.initialize();
 
+    // Obtener el email del usuario
+    _getUserEmail();
+
+
     // Check initial connectivity and listen for connectivity changes
     _checkInternetConnection();
     Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
@@ -39,12 +47,74 @@ class CameraWidgetState extends State<CameraWidget> {
     });
   }
 
+  Future<void> _getUserEmail() async {
+    final userCredentials = await _storageService.getUserCredentials();
+    setState(() {
+      userEmail = userCredentials?['email']; // Obtiene el campo 'email' desde SharedPreferences
+    });
+  }
+
+
   Future<void> _checkInternetConnection() async {
     var connectivityResult = await Connectivity().checkConnectivity();
     setState(() {
       _isConnected = connectivityResult == ConnectivityResult.mobile ||
           connectivityResult == ConnectivityResult.wifi;
     });
+  }
+
+  /// Método para agregar puntos al Firestore
+  Future<void> _addPointsToFirestore(int newPoints) async {
+    if (userEmail == null) {
+      print("El correo del usuario no está disponible.");
+      return;
+    }
+
+    try {
+      // Referencia al documento del usuario en Firestore
+      final userDoc = FirebaseFirestore.instance.collection('users').doc(userEmail);
+
+      // Obtiene el documento del usuario
+      final docSnapshot = await userDoc.get();
+
+      if (docSnapshot.exists) {
+        // Si el documento ya existe, actualiza los puntos
+        final data = docSnapshot.data() as Map<String, dynamic>;
+        final points = data['points'] ?? {};
+        final history = List<Map<String, dynamic>>.from(points['history'] ?? []);
+        final totalPoints = points['total'] ?? 0;
+
+        // Agrega la nueva entrada al historial
+        history.add({
+          'date': DateTime.now().toIso8601String().split('T')[0], // Solo la fecha
+          'points': newPoints,
+        });
+
+        // Actualiza los puntos y el historial en Firestore
+        await userDoc.update({
+          'points.history': history,
+          'points.total': totalPoints + newPoints,
+        });
+      } else {
+        // Si el documento no existe, crea uno nuevo
+        await userDoc.set({
+          'user_id': userEmail,
+          'points': {
+            'history': [
+              {
+                'date': DateTime.now().toIso8601String().split('T')[0],
+                'points': newPoints,
+              },
+            ],
+            'total': newPoints,
+          },
+        });
+      }
+
+      print("Puntos añadidos correctamente.");
+    } catch (e) {
+      print("Error al actualizar Firestore: $e");
+    }
   }
 
   @override
@@ -235,6 +305,10 @@ class CameraWidgetState extends State<CameraWidget> {
                         } else {
                           await _initializeControllerFuture;
                           final image = await _controller.takePicture();
+
+                          // Lógica para guardar puntos en Firestore
+                          await _addPointsToFirestore(50); // Añade 50 puntos por foto
+
                           if (!context.mounted) return;
                           await Navigator.of(context).push(
                             MaterialPageRoute(
