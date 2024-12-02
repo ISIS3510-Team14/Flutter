@@ -104,4 +104,30 @@ class FirestoreService {
       return [];
     }
   }
+
+  Future<List<DateTime>> fetchHistoryEntries(String userEmail) async {
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userEmail)
+          .get();
+
+      if (snapshot.exists) {
+        final data = snapshot.data();
+        if (data != null &&
+            data['points'] != null &&
+            data['points']['history'] != null) {
+          final historyList = data['points']['history'] as List;
+
+          return historyList.map((entry) {
+            return DateTime.parse(entry['date']);
+          }).toList();
+        }
+      }
+      return [];
+    } catch (e) {
+      print('Error fetching history entries: $e');
+      return [];
+    }
+  }
 }

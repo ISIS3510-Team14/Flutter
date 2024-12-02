@@ -3,6 +3,8 @@ import 'package:table_calendar/table_calendar.dart';
 import '../../core/utils/sustainu_colors.dart';
 import '../widgets/head.dart';
 import '../widgets/bottom_navbar.dart';
+import '../../data/services/firestore_service.dart';
+import '../../data/services/storage_service.dart';
 
 class HistoryScreen extends StatefulWidget {
   @override
@@ -12,19 +14,39 @@ class HistoryScreen extends StatefulWidget {
 class _HistoryScreenState extends State<HistoryScreen> {
   late DateTime _focusedDay;
   DateTime? _selectedDay;
+  final FirestoreService _firestoreService = FirestoreService();
+  final StorageService _storageService = StorageService();
 
-  DateTime startDate = DateTime(2024, 11, 24);
+  List<DateTime> entryDates = [];
 
   @override
   void initState() {
     super.initState();
     _focusedDay = DateTime.now();
+
+    loadData();
   }
 
-  bool _isStreakDay(DateTime day) {
-    final now = DateTime.now();
-    return day.isAfter(startDate.subtract(Duration(days: 1))) &&
-        day.isBefore(now.add(Duration(days: 1)));
+  Future<void> loadData() async {
+    try {
+      final credentials = await _storageService.getUserCredentials();
+      print("AQUI TAN");
+      print(credentials);
+
+      final entries =
+          await _firestoreService.fetchHistoryEntries(credentials?['email']);
+
+      setState(() {
+        entryDates = entries;
+      });
+    } catch (e) {
+      ///////
+      print('Error loading data: $e');
+    }
+  }
+
+  bool _hasEntry(DateTime day) {
+    return entryDates.any((entryDate) => isSameDay(entryDate, day));
   }
 
   @override
@@ -96,7 +118,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 ),
                 calendarBuilders: CalendarBuilders(
                   defaultBuilder: (context, day, focusedDay) {
-                    if (_isStreakDay(day)) {
+                    if (_hasEntry(day)) {
                       return Container(
                         decoration: BoxDecoration(
                           color: SustainUColors.limeGreen,
