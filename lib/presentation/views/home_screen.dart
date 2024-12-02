@@ -22,17 +22,14 @@ class _HomeScreenState extends State<HomeScreen> {
   final StorageService _storageService = StorageService();
   bool _isConnected = true; 
   late Connectivity _connectivity;
-  late Stream<ConnectivityResult>
-      _connectivityStream; 
+  late Stream<ConnectivityResult> _connectivityStream; 
   List<File> _tempImages = [];
-  StreamSubscription<ConnectivityResult>?
-      _connectivitySubscription; 
+  StreamSubscription<ConnectivityResult>? _connectivitySubscription; 
   final FirestoreService _firestoreService = FirestoreService();
-
- 
   int _totalPoints = 0;
   int _streakDays = 0;
   bool _dialogShown = false;
+  bool _hasShownOfflineDialog = false; // Nueva bandera para controlar el diálogo
 
   @override
   void initState() {
@@ -41,8 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _connectivityStream = _connectivity.onConnectivityChanged;
     _checkInternetConnection();
 
-    _connectivitySubscription =
-        _connectivityStream.listen((ConnectivityResult result) {
+    _connectivitySubscription = _connectivityStream.listen((ConnectivityResult result) {
       _updateConnectionStatus(result);
     });
 
@@ -53,14 +49,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
-    
     _connectivitySubscription?.cancel();
     super.dispose();
   }
 
   Future<void> _loadUserProfile() async {
-    Map<String, dynamic>? credentials =
-        await _storageService.getUserCredentials();
+    Map<String, dynamic>? credentials = await _storageService.getUserCredentials();
     setState(() {
       _name = credentials?['nickname'] ?? 'User';
     });
@@ -95,24 +89,32 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
 
+
   int _calculateStreakDays(List<Map<String, dynamic>> history) {
     if (history.isEmpty) return 0;
 
-    int streak = 1;
-    DateTime lastDate = DateTime.parse(history.last['date']);
+    // Step 1: Parse all dates to UTC and sort them
+    List<DateTime> dates = history
+        .map((entry) => DateTime.parse(entry['date']).toUtc())
+        .toList()
+      ..sort();
 
-    for (int i = history.length - 2; i >= 0; i--) {
-      DateTime currentDate = DateTime.parse(history[i]['date']);
-     
-      if (currentDate.isBefore(lastDate.subtract(Duration(days: 1)))) {
-        break;
-      } else if (currentDate.isAtSameMomentAs(lastDate.subtract(Duration(days: 1)))) {
+    // Step 2: Count consecutive days
+    int streak = 1; // Start with the first day as part of the streak
+    for (int i = 1; i < dates.length; i++) {
+      // Check if the current date is exactly one day after the previous date
+      if (dates[i].difference(dates[i - 1]).inDays == 1) {
         streak++;
+      } else if (dates[i].difference(dates[i - 1]).inDays > 1) {
+        // Break streak if there's a gap of more than one day
+        break;
       }
-      lastDate = currentDate;
     }
+
     return streak;
   }
+
+
 
   Future<void> _checkInternetConnection() async {
     var connectivityResult = await Connectivity().checkConnectivity();
@@ -120,19 +122,26 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _updateConnectionStatus(ConnectivityResult result) {
-    bool connected = result == ConnectivityResult.mobile ||
-        result == ConnectivityResult.wifi;
+    bool connected = result == ConnectivityResult.mobile || result == ConnectivityResult.wifi;
 
-    if (!connected && _isConnected && !_dialogShown) {
-      _showNoInternetDialog(); 
+    if (!connected && _isConnected && !_hasShownOfflineDialog) {
+      _showNoInternetDialog(); // Mostrar diálogo si no se ha mostrado aún
     }
 
     setState(() {
       _isConnected = connected;
+      if (connected) {
+        _hasShownOfflineDialog = false; // Restablecer bandera al reconectar
+      }
     });
   }
 
   void _showNoInternetDialog() {
+    setState(() {
+      _dialogShown = true; 
+      _hasShownOfflineDialog = true; // Establecer bandera como verdadera
+    });
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -194,7 +203,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<List<File>> _loadTemporaryImages() async {
     final directory = await getTemporaryDirectory();
-    print(directory.path);
     final tempImages = Directory(directory.path);
     List<File> images = [];
 
@@ -228,7 +236,7 @@ class _HomeScreenState extends State<HomeScreen> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Cerrar el diálogo
+                Navigator.of(context).pop();
               },
               child: Text('OK'),
             ),
@@ -244,8 +252,7 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (context) {
         return AlertDialog(
           title: Text('Temporary Images Loaded'),
-          content:
-              Text('You have images available. Would you like to view them?'),
+          content: Text('You have images available. Would you like to view them?'),
           actions: [
             TextButton(
               onPressed: () {
@@ -311,7 +318,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     SizedBox(height: 10),
                     Text(
-                      '$_totalPoints Points', // Mostrar los puntos cargados
+                      '$_totalPoints Points',
                       style: TextStyle(
                         fontFamily: 'Montserrat',
                         fontWeight: FontWeight.bold,
@@ -319,7 +326,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     Text(
-                      '$_streakDays Days', // Mostrar el streak de días
+                      '$_streakDays Days',
                       style: TextStyle(
                         color: SustainUColors.lightBlue,
                         fontFamily: 'Montserrat',
