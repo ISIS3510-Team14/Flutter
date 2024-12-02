@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/utils/sustainu_colors.dart';
 import '../widgets/head.dart';
 import '../widgets/bottom_navbar.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class User {
   final String name;
@@ -38,7 +39,6 @@ class User {
   }
 
   factory User.fromFirestore(Map<String, dynamic> data) {
-    print("esta es la data: $data");
     final points = data['points'] ?? {};
     final history = List<Map<String, dynamic>>.from(points['history'] ?? []);
     return User(
@@ -60,11 +60,16 @@ class _ScoreboardScreenState extends State<ScoreboardScreen> {
   List<User> filteredUsers = [];
   bool isLoading = true;
   String searchQuery = '';
+  bool _isConnected = true;
 
   @override
   void initState() {
     super.initState();
+    _checkInternetConnection();
     _loadUsers();
+    Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
+      _checkInternetConnection();
+    });
   }
 
   // Método para filtrar usuarios
@@ -82,12 +87,29 @@ class _ScoreboardScreenState extends State<ScoreboardScreen> {
     });
   }
 
+  Future<void> _checkInternetConnection() async {
+    var connectivityResult = await Connectivity().checkConnectivity();
+    setState(() {
+      _isConnected = connectivityResult == ConnectivityResult.mobile ||
+          connectivityResult == ConnectivityResult.wifi;
+    });
+  }
+
   Future<void> _loadUsers() async {
     try {
-      final querySnapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .orderBy('points.total', descending: true)
-          .get();
+      var querySnapshot = await FirebaseFirestore.instance
+                  .collection('users')
+                  .orderBy('points.total', descending: true)
+                  .get(GetOptions(source: Source.cache));
+      print("cargando usuario desde cache");
+      if (_isConnected)
+      {
+        querySnapshot = await FirebaseFirestore.instance
+                  .collection('users')
+                  .orderBy('points.total', descending: true)
+                  .get(GetOptions(source: Source.server));
+        print("cargando usuario desde server");
+      }
 
       final loadedUsers = querySnapshot.docs
           .map((doc) => User.fromFirestore(doc.data()))
