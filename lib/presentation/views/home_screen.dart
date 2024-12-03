@@ -90,28 +90,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
 
 
+
   int _calculateStreakDays(List<Map<String, dynamic>> history) {
     if (history.isEmpty) return 0;
 
-    // Step 1: Parse all dates to UTC and sort them
-    List<DateTime> dates = history
-        .map((entry) => DateTime.parse(entry['date']).toUtc())
-        .toList()
-      ..sort();
+    // Extract and normalize the distinct dates
+    Set distinctDates = history.map((entry) => entry['date']).toSet();
 
-    // Step 2: Count consecutive days
-    int streak = 1; // Start with the first day as part of the streak
-    for (int i = 1; i < dates.length; i++) {
-      // Check if the current date is exactly one day after the previous date
-      if (dates[i].difference(dates[i - 1]).inDays == 1) {
-        streak++;
-      } else if (dates[i].difference(dates[i - 1]).inDays > 1) {
-        // Break streak if there's a gap of more than one day
-        break;
-      }
-    }
-
-    return streak;
+    // Count the number of unique dates
+    return distinctDates.length;
   }
 
 
