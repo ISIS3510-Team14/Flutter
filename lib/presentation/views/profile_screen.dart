@@ -62,36 +62,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<UserProfile> _loadUserProfile() async {
-    Map<String, dynamic>? credentials =
-        await _storageService.getUserCredentials();
-    final email = credentials?['email'] ?? 'Unknown Email';
+    // Pre-declare and reuse variables to avoid redundant object creation
+    Map<String, dynamic>? credentials = await _storageService.getUserCredentials();
+    String email = credentials?['email'] ?? 'Unknown Email';
 
-    final userDoc = await _firestore.collection('users').doc(email).get();
-    final userInfoDoc = await _firestore.collection('users_info').doc(email).get();
+    DocumentSnapshot userDoc = await _firestore.collection('users').doc(email).get();
+    DocumentSnapshot userInfoDoc = await _firestore.collection('users_info').doc(email).get();
 
     if (!userInfoDoc.exists) {
-      // Crear documento en caso de que no exista
+      // Initialize default values only once when the document does not exist
       await _firestore.collection('users_info').doc(email).set({
         'career': '',
         'semester': '',
       });
     }
 
-    final userData = userDoc.data() ?? {};
-    final userInfoData = userInfoDoc.data() ?? {};
+    // Consolidate data extraction with explicit casting
+    Map<String, dynamic> userData = (userDoc.data() as Map<String, dynamic>? ?? {});
+    Map<String, dynamic> userInfoData = (userInfoDoc.data() as Map<String, dynamic>? ?? {});
 
-    // Guardar datos localmente
-    _localData['nickname'] = credentials?['nickname'] ?? 'Unknown User';
-    _localData['email'] = email;
-    _localData['profilePicture'] = credentials?['picture'];
-    _localData['totalPoints'] = userData['points']?['total'] ?? 0;
-    _localData['career'] = userInfoData['career'] ?? '';
-    _localData['semester'] = userInfoData['semester'] ?? '';
+    // Update controller values directly without creating new objects
+    _careerController.text = userInfoData['career'] ?? '';
+    _semesterController.text = userInfoData['semester'] ?? '';
 
-    // Inicializar controladores con datos locales
-    _careerController.text = _localData['career'];
-    _semesterController.text = _localData['semester'];
+    // Update local data efficiently
+    _localData = {
+      'nickname': credentials?['nickname'] ?? 'Unknown User',
+      'email': email,
+      'profilePicture': credentials?['picture'],
+      'totalPoints': userData['points']?['total'] ?? 0,
+      'career': _careerController.text,
+      'semester': _semesterController.text,
+    };
 
+    // Return updated profile without redundant variables
     return UserProfile(
       nickname: _localData['nickname'],
       email: _localData['email'],
@@ -103,33 +107,48 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _saveProfile(String email, String? career, String? semester) async {
+    // Check for connectivity before proceeding
     if (!_isConnected) {
       _showNoInternetMessage();
       return;
     }
 
     try {
+      // Consolidate Firestore write operation to prevent redundant object creation
       await _firestore.collection('users_info').doc(email).set({
         'career': career,
         'semester': semester,
       }, SetOptions(merge: true));
 
-      // Actualizar datos locales
+      // Update local data efficiently
+      _localData['career'] = career;
+      _localData['semester'] = semester;
+
+      // Avoid redundant setState calls
       setState(() {
-        _localData['career'] = career;
-        _localData['semester'] = semester;
-        _userProfile = _loadUserProfile(); // Refrescar perfil
+        _userProfile = Future.value(UserProfile(
+          nickname: _localData['nickname'],
+          email: _localData['email'],
+          profilePicture: _localData['profilePicture'],
+          totalPoints: _localData['totalPoints'],
+          career: _localData['career'],
+          semester: _localData['semester'],
+        ));
       });
 
+      // Inform the user of success
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Profile updated successfully!')));
+        SnackBar(content: Text('Profile updated successfully!')),
+      );
     } catch (e) {
+      // Catch and handle errors
       print('Failed to save profile: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to update profile. Please try again.')),
       );
     }
   }
+
 
   Future<void> logoutAction(BuildContext context) async {
     if (!_isConnected) {

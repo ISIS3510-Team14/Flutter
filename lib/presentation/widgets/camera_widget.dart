@@ -111,10 +111,32 @@ class CameraWidgetState extends State<CameraWidget> {
         });
       }
 
+      // Show notification when points are added
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Congratulations, You earned $newPoints points!",
+            style: GoogleFonts.montserrat(
+              fontSize: 16,
+              color: Colors.white,
+            ),
+          ),
+          backgroundColor: SustainUColors.limeGreen,
+          duration: Duration(seconds: 3),
+        ),
+      );
+
       print("Puntos añadidos correctamente.");
     } catch (e) {
       print("Error al actualizar Firestore: $e");
     }
+  }
+
+  /// Simulate detecting an item
+  Future<String> _detectItem() async {
+    // Replace this placeholder with actual detection logic
+    await Future.delayed(Duration(seconds: 1)); // Simulate delay for detection
+    return "item detected"; // Change to "item not detected" for testing
   }
 
   @override
