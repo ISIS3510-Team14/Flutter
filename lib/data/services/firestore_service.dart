@@ -1,11 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:sustain_u/data/models/loc_model.dart';
+import 'local_storage_service.dart';
 
 class FirestoreService {
   final FirebaseFirestore _db;
+  final LocalStorageService _localStorageService;
 
-  FirestoreService() : _db = FirebaseFirestore.instance {
+  FirestoreService()
+      : _db = FirebaseFirestore.instance,
+        _localStorageService = LocalStorageService() {
     _db.settings = Settings(persistenceEnabled: true);
   }
 
@@ -107,10 +111,10 @@ class FirestoreService {
 
   Future<List<DateTime>> fetchHistoryEntries(String userEmail) async {
     try {
-      final snapshot = await FirebaseFirestore.instance
+      final snapshot = await _db
           .collection('users')
           .doc(userEmail)
-          .get();
+          .get(GetOptions(source: Source.server));
 
       if (snapshot.exists) {
         final data = snapshot.data();
@@ -119,15 +123,22 @@ class FirestoreService {
             data['points']['history'] != null) {
           final historyList = data['points']['history'] as List;
 
-          return historyList.map((entry) {
+          final entries = historyList.map((entry) {
             return DateTime.parse(entry['date']);
           }).toList();
+
+          // Save to local storage for offline use
+          await _localStorageService.saveHistoryEntries(entries);
+
+          return entries;
         }
       }
-      return [];
     } catch (e) {
-      print('Error fetching history entries: $e');
-      return [];
+      print('Error fetching history entries from Firestore: $e');
     }
+
+    // Fallback to local storage
+    print('Fetching history entries from local storage...');
+    return await _localStorageService.getHistoryEntries();
   }
 }
