@@ -19,23 +19,15 @@ class User {
   static int _calculateStreakDays(List<Map<String, dynamic>> history) {
     if (history.isEmpty) return 0;
 
-    int streak = 1;
-    if (history.last['date'].toString().split('-').length != 3) return 0;
-    DateTime lastDate = DateTime.parse(history.last['date']);
-
-    for (int i = history.length - 2; i >= 0; i--) {
-      if (history[i]['date'].toString().split('-').length != 3) continue;
-      DateTime currentDate = DateTime.parse(history[i]['date']);
-
-      if (currentDate.isBefore(lastDate.subtract(Duration(days: 1)))) {
-        break;
-      } else if (currentDate
-          .isAtSameMomentAs(lastDate.subtract(Duration(days: 1)))) {
-        streak++;
-      }
-      lastDate = currentDate;
+    // Usando Set para almacenar fechas únicas
+    Set<String> distinctDates = {};
+    
+    // Bucle indexado en lugar de map
+    for (int i = 0; i < history.length; i++) {
+      distinctDates.add(history[i]['date'].toString());
     }
-    return streak;
+
+    return distinctDates.length;
   }
 
   factory User.fromFirestore(Map<String, dynamic> data) {
@@ -79,10 +71,16 @@ class _ScoreboardScreenState extends State<ScoreboardScreen> {
       if (query.isEmpty) {
         filteredUsers = users;
       } else {
-        filteredUsers = users
-            .where((user) =>
-                user.name.toLowerCase().contains(query.toLowerCase()))
-            .toList();
+        List<User> filtered = [];
+        String lowercaseQuery = query.toLowerCase();
+        
+        // Bucle indexado en lugar de where
+        for (int i = 0; i < users.length; i++) {
+          if (users[i].name.toLowerCase().contains(lowercaseQuery)) {
+            filtered.add(users[i]);
+          }
+        }
+        filteredUsers = filtered;
       }
     });
   }
@@ -131,116 +129,115 @@ class _ScoreboardScreenState extends State<ScoreboardScreen> {
     return Scaffold(
       backgroundColor: SustainUColors.background,
       bottomNavigationBar: BottomNavBar(currentIndex: 4),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding:
-                  const EdgeInsets.only(top: 30.0, left: 16.0, right: 16.0),
-              child: HeaderWidget(),
-            ),
-            SizedBox(height: 20),
-
-            // Title
-            Row(
-              children: [
-                IconButton(
-                  icon: Icon(Icons.arrow_back, color: SustainUColors.limeGreen),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                ),
-                SizedBox(width: 8),
-                Text(
-                  'Scoreboard',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: SustainUColors.text,
+      body: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: SafeArea(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(32, 30, 32, 0),
+                    child: HeaderWidget(),
                   ),
-                ),
-              ],
-            ),
-            SizedBox(height: 10),
-            // Search bar
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: TextField(
-                decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.search, color: SustainUColors.limeGreen),
-                  hintText: "Enter a name",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: SustainUColors.limeGreen),
+                  ListTile(
+                    leading: IconButton(
+                      icon: Icon(Icons.arrow_back, color: SustainUColors.limeGreen),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    title: Text(
+                      'Scoreboard',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: SustainUColors.text,
+                      ),
+                    ),
                   ),
-                ),
-                onChanged: _filterUsers, // Añadir onChanged
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: TextField(
+                      decoration: InputDecoration(
+                        prefixIcon: Icon(Icons.search, color: SustainUColors.limeGreen),
+                        hintText: "Enter a name",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: SustainUColors.limeGreen),
+                        ),
+                      ),
+                      onChanged: _filterUsers,
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                ],
               ),
             ),
-            SizedBox(height: 10),
-
-            // Scoreboard List
-            Expanded(
-              child: isLoading
-                  ? Center(child: CircularProgressIndicator())
-                  : filteredUsers.isEmpty
-                      ? Center(
-                          child: Text(
-                            searchQuery.isEmpty
-                                ? 'No users found'
-                                : 'No results for "$searchQuery"',
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                        )
-                      : ListView.builder(
-                          itemCount: filteredUsers.length,
-                          itemBuilder: (context, index) {
-                            final user = filteredUsers[index];
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 8.0),
-                              child: Card(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                elevation: 2,
-                                child: ListTile(
-                                  leading: CircleAvatar(
-                                    backgroundColor: SustainUColors.limeGreen,
-                                    backgroundImage: NetworkImage('https://picsum.photos/seed/${user.name}/${100}'),
-                                  ),
-                                  title: Text(
-                                    user.name,
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: SustainUColors.text,
-                                    ),
-                                  ),
-                                  subtitle: Text(
-                                    '${user.days} Days',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: SustainUColors.text.withOpacity(0.6),
-                                    ),
-                                  ),
-                                  trailing: Text(
-                                    '${user.points} Points',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: SustainUColors.limeGreen,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
+          ),
+          if (isLoading)
+            SliverFillRemaining(
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (filteredUsers.isEmpty)
+            SliverFillRemaining(
+              child: Center(
+                child: Text(
+                  searchQuery.isEmpty ? 'No users found' : 'No results for "$searchQuery"',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ),
+            )
+          else
+            SliverPadding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    final user = filteredUsers[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
+                        elevation: 2,
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: SustainUColors.limeGreen,
+                            backgroundImage: NetworkImage('https://picsum.photos/seed/${user.name}/${100}'),
+                          ),
+                          title: Text(
+                            user.name,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: SustainUColors.text,
+                            ),
+                          ),
+                          subtitle: Text(
+                            '${user.days} Days',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: SustainUColors.text.withOpacity(0.6),
+                            ),
+                          ),
+                          trailing: Text(
+                            '${user.points} Points',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: SustainUColors.limeGreen,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                  childCount: filteredUsers.length,
+                ),
+              ),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }
