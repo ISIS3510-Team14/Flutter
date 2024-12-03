@@ -48,7 +48,13 @@ class GreenPoints extends StatelessWidget {
                 imagePath,
                 width: 400,
                 errorBuilder: (context, error, stackTrace) {
-                  return const Text('Image not available');
+                  // This will display a local asset as a fallback in case of an error
+                  return Center(
+                    child: Image.asset(
+                      'assets/default_image.jpeg',
+                      width: 250,
+                    ),
+                  );
                 },
                 loadingBuilder: (context, child, loadingProgress) {
                   if (loadingProgress == null) return child;

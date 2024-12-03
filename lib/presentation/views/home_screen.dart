@@ -1,7 +1,8 @@
-import 'dart:async'; // Add this import
+import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:connectivity_plus/connectivity_plus.dart'; // Importing connectivity package
+import 'package:connectivity_plus/connectivity_plus.dart'; 
 import 'package:sustain_u/data/services/firestore_service.dart';
 import '../../core/utils/sustainu_colors.dart';
 import '../widgets/head.dart';
@@ -19,14 +20,16 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   String _name = 'User';
   final StorageService _storageService = StorageService();
-  bool _isConnected = true; // Track internet connection status
+  bool _isConnected = true; 
   late Connectivity _connectivity;
-  late Stream<ConnectivityResult>
-      _connectivityStream; // Store connectivity stream
+  late Stream<ConnectivityResult> _connectivityStream; 
   List<File> _tempImages = [];
-  StreamSubscription<ConnectivityResult>?
-      _connectivitySubscription; // Subscription for connectivity changes
+  StreamSubscription<ConnectivityResult>? _connectivitySubscription; 
   final FirestoreService _firestoreService = FirestoreService();
+  int _totalPoints = 0;
+  int _streakDays = 0;
+  bool _dialogShown = false;
+  bool _hasShownOfflineDialog = false; // Nueva bandera para controlar el diálogo
 
   @override
   void initState() {
@@ -35,30 +38,70 @@ class _HomeScreenState extends State<HomeScreen> {
     _connectivityStream = _connectivity.onConnectivityChanged;
     _checkInternetConnection();
 
-    // Listen to connectivity changes only while on HomeScreen
-    _connectivitySubscription =
-        _connectivityStream.listen((ConnectivityResult result) {
+    _connectivitySubscription = _connectivityStream.listen((ConnectivityResult result) {
       _updateConnectionStatus(result);
     });
 
     _loadUserProfile();
-    _loadTemporaryImages(); // Now handles showing dialog internally
+    _loadUserPoints(); 
+    _loadTemporaryImages(); 
   }
 
   @override
   void dispose() {
-    // Cancel connectivity listener when leaving HomeScreen
     _connectivitySubscription?.cancel();
     super.dispose();
   }
 
   Future<void> _loadUserProfile() async {
-    Map<String, dynamic>? credentials =
-        await _storageService.getUserCredentials();
+    Map<String, dynamic>? credentials = await _storageService.getUserCredentials();
     setState(() {
       _name = credentials?['nickname'] ?? 'User';
     });
   }
+
+  Future<void> _loadUserPoints() async {
+    final userCredentials = await _storageService.getUserCredentials();
+    final userEmail = userCredentials?['email'];
+
+    if (userEmail != null) {
+      try {
+        final userDoc = FirebaseFirestore.instance.collection('users').doc(userEmail);
+        final docSnapshot = await userDoc.get();
+
+        if (docSnapshot.exists) {
+          final data = docSnapshot.data() as Map<String, dynamic>;
+          final points = data['points'] ?? {};
+          final history = List<Map<String, dynamic>>.from(points['history'] ?? []);
+
+          int totalPoints = points['total'] ?? 0;
+          int streakDays = _calculateStreakDays(history);
+
+          setState(() {
+            _totalPoints = totalPoints;
+            _streakDays = streakDays;
+          });
+        }
+      } catch (e) {
+        print("Error fetching user points: $e");
+      }
+    }
+  }
+
+
+
+
+  int _calculateStreakDays(List<Map<String, dynamic>> history) {
+    if (history.isEmpty) return 0;
+
+    // Extract and normalize the distinct dates
+    Set distinctDates = history.map((entry) => entry['date']).toSet();
+
+    // Count the number of unique dates
+    return distinctDates.length;
+  }
+
+
 
   Future<void> _checkInternetConnection() async {
     var connectivityResult = await Connectivity().checkConnectivity();
@@ -66,19 +109,26 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _updateConnectionStatus(ConnectivityResult result) {
-    bool connected = result == ConnectivityResult.mobile ||
-        result == ConnectivityResult.wifi;
+    bool connected = result == ConnectivityResult.mobile || result == ConnectivityResult.wifi;
 
-    if (!connected && _isConnected) {
-      _showNoInternetDialog(); // Show dialog if connection is lost
+    if (!connected && _isConnected && !_hasShownOfflineDialog) {
+      _showNoInternetDialog(); // Mostrar diálogo si no se ha mostrado aún
     }
 
     setState(() {
       _isConnected = connected;
+      if (connected) {
+        _hasShownOfflineDialog = false; // Restablecer bandera al reconectar
+      }
     });
   }
 
   void _showNoInternetDialog() {
+    setState(() {
+      _dialogShown = true; 
+      _hasShownOfflineDialog = true; // Establecer bandera como verdadera
+    });
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -140,32 +190,27 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<List<File>> _loadTemporaryImages() async {
     final directory = await getTemporaryDirectory();
-    print(directory.path);
     final tempImages = Directory(directory.path);
     List<File> images = [];
 
     if (await tempImages.exists()) {
-      // List all files in the directory
       final List<FileSystemEntity> allFiles = tempImages.listSync();
-
-      // Filter the files to include only those with image extensions
       images = allFiles.whereType<File>().where((file) {
         final ext = path.extension(file.path).toLowerCase();
         return ['.jpg', '.jpeg', '.png', '.gif'].contains(ext);
       }).toList();
     }
 
-    // Check for internet connection
     bool hasInternet = _isConnected;
     if (hasInternet) {
       if (images.isNotEmpty) {
         _showImageDialog(images);
       } else {
-        _showNoImagesDialog(); // Show popup if no images are found
+        _showNoImagesDialog(); 
       }
     }
 
-    return images; // Return the loaded images
+    return images;
   }
 
   void _showNoImagesDialog() {
@@ -178,7 +223,7 @@ class _HomeScreenState extends State<HomeScreen> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop();
               },
               child: Text('OK'),
             ),
@@ -194,18 +239,17 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (context) {
         return AlertDialog(
           title: Text('Temporary Images Loaded'),
-          content:
-              Text('You have images available. Would you like to view them?'),
+          content: Text('You have images available. Would you like to view them?'),
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop();
               },
               child: Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop(); 
                 Navigator.pushNamed(context, '/viewImages', arguments: images);
               },
               child: Text('View Images'),
@@ -261,7 +305,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     SizedBox(height: 10),
                     Text(
-                      '68 Points',
+                      '$_totalPoints Points',
                       style: TextStyle(
                         fontFamily: 'Montserrat',
                         fontWeight: FontWeight.bold,
@@ -269,7 +313,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     Text(
-                      '99 Days',
+                      '$_streakDays Days',
                       style: TextStyle(
                         color: SustainUColors.lightBlue,
                         fontFamily: 'Montserrat',

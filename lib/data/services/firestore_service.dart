@@ -1,11 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:sustain_u/data/models/loc_model.dart';
+import 'local_storage_service.dart';
 
 class FirestoreService {
   final FirebaseFirestore _db;
+  final LocalStorageService _localStorageService;
 
-  FirestoreService() : _db = FirebaseFirestore.instance {
+  FirestoreService()
+      : _db = FirebaseFirestore.instance,
+        _localStorageService = LocalStorageService() {
     _db.settings = Settings(persistenceEnabled: true);
   }
 
@@ -103,5 +107,36 @@ class FirestoreService {
       print('Error fetching location points from server: $e');
       return [];
     }
+  }
+
+  Future<List<DateTime>> fetchHistoryEntries(String userEmail) async {
+    try {
+      final snapshot = await _db
+          .collection('users')
+          .doc(userEmail)
+          .get(GetOptions(source: Source.server));
+
+      if (snapshot.exists) {
+        final data = snapshot.data();
+        if (data != null &&
+            data['points'] != null &&
+            data['points']['history'] != null) {
+          final historyList = data['points']['history'] as List;
+
+          final entries = historyList.map((entry) {
+            return DateTime.parse(entry['date']);
+          }).toList();
+
+          await _localStorageService.saveHistoryEntries(entries);
+
+          return entries;
+        }
+      }
+    } catch (e) {
+      print('Error fetching history entries from Firestore: $e');
+    }
+
+    print('Fetching history entries from local storage...');
+    return await _localStorageService.getHistoryEntries();
   }
 }

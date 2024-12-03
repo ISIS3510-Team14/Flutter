@@ -38,6 +38,7 @@ class _GoogleMapsState extends State<GoogleMaps> {
     super.initState();
     customMarker();
     fetchInitialLocationPoints();
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await fetchLocationUpdates();
       setMarkers();
@@ -208,39 +209,7 @@ class _GoogleMapsState extends State<GoogleMaps> {
           markerId: MarkerId(point.position.toString()),
           position: point.position,
           icon: customIcon,
-          onTap: () async {
-            if (isNavigating) return;
-
-            isNavigating = true;
-            final connectivityResult = await Connectivity().checkConnectivity();
-
-            try {
-              if (connectivityResult == ConnectivityResult.wifi ||
-                  connectivityResult == ConnectivityResult.mobile) {
-                await _firestoreService.incrementPointCount(point.name);
-              } else {
-                print("Offline - unable to increment point count.");
-              }
-
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => GreenPoints(
-                    imagePath: point.imgUrl,
-                    title: point.name,
-                    description: point.description,
-                    categories: point.category,
-                  ),
-                ),
-              );
-            } catch (e) {
-              print("Error during navigation or incrementing count: $e");
-            } finally {
-              setState(() {
-                isNavigating = false;
-              });
-            }
-          },
+          onTap: () => _handleOnTap(point),
         ),
       );
     }
@@ -387,74 +356,40 @@ class _GoogleMapsState extends State<GoogleMaps> {
                           final point = filteredPoints[index];
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: ListTile(
-                              leading: Image.asset(
-                                "assets/ic_pick.png",
-                                width: 30,
-                                height: 30,
-                              ),
-                              title: Text(
-                                point.name,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
+                            child: RepaintBoundary(
+                              child: ListTile(
+                                leading: Image.asset(
+                                  "assets/ic_pick.png",
+                                  width: 30,
+                                  height: 30,
                                 ),
-                              ),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(point.description),
-                                  const SizedBox(height: 5),
-                                  GestureDetector(
-                                    onTap: () {},
-                                    child: const Text(
-                                      "Recyclables and Organic",
-                                      style: TextStyle(
-                                        color: Color.fromRGBO(17, 144, 198, 1),
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
+                                title: Text(
+                                  point.name,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                ],
-                              ),
-                              onTap: () async {
-                                if (isNavigating) return;
-
-                                isNavigating = true;
-                                final connectivityResult =
-                                    await Connectivity().checkConnectivity();
-
-                                try {
-                                  if (connectivityResult ==
-                                          ConnectivityResult.wifi ||
-                                      connectivityResult ==
-                                          ConnectivityResult.mobile) {
-                                    await _firestoreService
-                                        .incrementPointCount(point.name);
-                                  } else {
-                                    print(
-                                        "Offline - unable to increment point count.");
-                                  }
-
-                                  await Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => GreenPoints(
-                                        imagePath: point.imgUrl,
-                                        title: point.name,
-                                        description: point.description,
-                                        categories: point.category,
+                                ),
+                                subtitle: Text.rich(
+                                  TextSpan(
+                                    children: [
+                                      TextSpan(
+                                        text: "${point.description}\n",
+                                        style:
+                                            DefaultTextStyle.of(context).style,
                                       ),
-                                    ),
-                                  );
-                                } catch (e) {
-                                  print(
-                                      "Error during navigation or incrementing count: $e");
-                                } finally {
-                                  setState(() {
-                                    isNavigating = false;
-                                  });
-                                }
-                              },
+                                      TextSpan(
+                                        text: "Recyclables and Organic",
+                                        style: const TextStyle(
+                                          color:
+                                              Color.fromRGBO(17, 144, 198, 1),
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                onTap: () => _handleOnTap(point),
+                              ),
                             ),
                           );
                         },
@@ -469,6 +404,43 @@ class _GoogleMapsState extends State<GoogleMaps> {
       ),
       bottomNavigationBar: BottomNavBar(currentIndex: 1),
     );
+  }
+
+  void _handleOnTap(LocationPoint point) async {
+    if (isNavigating) return;
+
+    setState(() {
+      isNavigating = true;
+    });
+
+    final connectivityResult = await Connectivity().checkConnectivity();
+
+    try {
+      if (connectivityResult == ConnectivityResult.wifi ||
+          connectivityResult == ConnectivityResult.mobile) {
+        await _firestoreService.incrementPointCount(point.name);
+      } else {
+        print("Offline - unable to increment point count.");
+      }
+
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => GreenPoints(
+            imagePath: point.imgUrl,
+            title: point.name,
+            description: point.description,
+            categories: point.category,
+          ),
+        ),
+      );
+    } catch (e) {
+      print("Error during navigation or incrementing count: $e");
+    } finally {
+      setState(() {
+        isNavigating = false;
+      });
+    }
   }
 
   Future<void> fetchLocationUpdates() async {
