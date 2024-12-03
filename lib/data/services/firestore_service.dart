@@ -127,7 +127,6 @@ class FirestoreService {
             return DateTime.parse(entry['date']);
           }).toList();
 
-          // Save to local storage for offline use
           await _localStorageService.saveHistoryEntries(entries);
 
           return entries;
@@ -137,7 +136,6 @@ class FirestoreService {
       print('Error fetching history entries from Firestore: $e');
     }
 
-    // Fallback to local storage
     print('Fetching history entries from local storage...');
     return await _localStorageService.getHistoryEntries();
   }
