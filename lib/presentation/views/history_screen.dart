@@ -28,12 +28,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Future<void> loadData() async {
-    print('loadData() called'); // Debug
-
     try {
       final credentials = await _storageService.getUserCredentials();
-      print("CREDENTIALS");
-      print(credentials);
       final entries =
           await _firestoreService.fetchHistoryEntries(credentials?['email']);
       print(entries);
@@ -41,8 +37,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
       setState(() {
         entryDates = entries;
       });
-
-      print('Loaded entryDates: $entryDates'); // Debug print
     } catch (e) {
       print('Error loading data: $e');
     }
