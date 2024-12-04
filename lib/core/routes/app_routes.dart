@@ -19,25 +19,30 @@ import 'package:camera/camera.dart';
 import 'package:sustain_u/presentation/views/instructions_screen.dart';
 
 class AppRoutes {
-  static Map<String, WidgetBuilder> routes(CameraDescription camera){
+  static Map<String, WidgetBuilder> routes(CameraDescription camera) {
     return {
-    '/': (context) => LoginScreen(),
-    '/sign_in': (context) => SignInScreen(),
-    '/home': (context) => HomeScreen(),
-    '/profile': (context) => ProfileScreen(),
-    '/camera': (context) => CameraScreen(camera: camera),
-    '/map': (context) => GoogleMaps(),
-    '/recycle': (context) => RecycleScreen(),
-    '/scoreboard': (context) => ScoreboardScreen(),
-    '/history': (context) => HistoryScreen(),
-    '/instructions': (context) => InstructionsScreen(),
-    '/paper': (context) => PaperScreen(),
-    '/plastic': (context) => PlasticScreen(),
-    '/metal': (context) => MetalScreen(),
-    '/glass': (context) => GlassScreen(),
-    '/viewImages': (context) => ViewImagesScreen(),
-    '/others': (context) => OtherScreen(),
-    '/organic': (context) => OrganicScreen(),
+      '/': (context) => LoginScreen(),
+      '/sign_in': (context) => SignInScreen(),
+      '/home': (context) => HomeScreen(),
+      '/profile': (context) => ProfileScreen(),
+      '/camera': (context) => CameraScreen(camera: camera),
+      '/map': (context) => GoogleMaps(),
+      '/recycle': (context) => RecycleScreen(),
+      '/scoreboard': (context) => ScoreboardScreen(),
+      '/history': (context) => HistoryScreen(),
+      '/instructions': (context) => InstructionsScreen(),
+      '/paper': (context) => PaperScreen(),
+      '/plastic': (context) => PlasticScreen(),
+      '/metal': (context) => MetalScreen(),
+      '/glass': (context) => GlassScreen(),
+      '/viewImages': (context) {
+        // Extrae el email del usuario desde argumentos o almacenamiento
+        final userEmail = ModalRoute.of(context)?.settings.arguments as String? ?? '';
+        return ViewImagesScreen(userEmail: userEmail);
+      },
+      '/others': (context) => OtherScreen(),
+      '/organic': (context) => OrganicScreen(),
     };
   }
 }
+

@@ -4,6 +4,9 @@ import 'package:path/path.dart' as path;
 import '../../presentation/widgets/display_picture_widget.dart';
 
 class ViewImagesScreen extends StatefulWidget {
+  final String userEmail;
+  const ViewImagesScreen({Key? key, required this.userEmail}) : super(key: key);
+
   @override
   _ViewImagesScreenState createState() => _ViewImagesScreenState();
 }
@@ -77,7 +80,10 @@ class _ViewImagesScreenState extends State<ViewImagesScreen> {
 
                 await Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => DisplayPictureScreen(imagePath: imagePath),
+                    builder: (context) => DisplayPictureScreen(
+                      imagePath: imagePath,
+                      userEmail: widget.userEmail, // Pasamos el userEmail aquí
+                    ),
                   ),
                 );
 

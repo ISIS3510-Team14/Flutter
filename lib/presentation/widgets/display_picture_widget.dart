@@ -84,7 +84,8 @@ Future<Map<String, dynamic>> getAnswer(String imagePath, Timer timer) async {
     }
   } catch (e) {
     timer.cancel();
-    String errorMessage = "Lost connection to the internet. Make sure you have an internet connection and try again";
+    String errorMessage =
+        "Lost connection to the internet. Make sure you have an internet connection and try again";
     throw Exception(errorMessage);
   }
 
@@ -101,27 +102,34 @@ Future<Map<String, dynamic>> getAnswer(String imagePath, Timer timer) async {
 
 class DisplayPictureScreen extends StatefulWidget {
   final String imagePath;
+  final String userEmail;
 
-  const DisplayPictureScreen({super.key, required this.imagePath});
+  const DisplayPictureScreen({
+    Key? key,
+    required this.imagePath,
+    required this.userEmail,
+  }) : super(key: key);
 
   @override
   _DisplayPictureScreenState createState() => _DisplayPictureScreenState();
 }
 
 class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
-  int timerCount = 0; // Timer count in seconds
-  late Timer _timer; // Timer object
-  bool isTimerActive = false; // To track if the timer is running
+  int timerCount = 0;
+  late Timer _timer;
+  bool isTimerActive = false;
+  bool _hasPointsBeenAdded = false; // Flag to ensure points are only added once.
 
   @override
   void initState() {
     super.initState();
-    startTimer(); // Start the timer when the screen loads
+    
+    startTimer();
   }
 
   @override
   void dispose() {
-    _timer.cancel(); // Cancel the timer when the widget is disposed
+    _timer.cancel();
     super.dispose();
   }
 
@@ -136,13 +144,12 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
     }
   }
 
-  // Function to start the timer
   void startTimer() {
     isTimerActive = true;
     _timer = Timer.periodic(const Duration(seconds: 1), (Timer timer) {
       if (mounted) {
         setState(() {
-          timerCount += 1; // Increment the timer every second
+          timerCount += 1;
         });
       }
     });
@@ -150,35 +157,88 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
 
   Future<Map<String, dynamic>> getAnswerWithTiming() async {
     final result = await getAnswer(widget.imagePath, _timer);
-    _timer.cancel(); // Stop the timer when the future is completed
+    _timer.cancel();
 
-    final startTime = DateTime.now(); // Empieza el conteo del tiempo
-
-    final duration = DateTime.now()
-        .difference(startTime)
-        .inMilliseconds; // Calcular la duración
     final trashType = result['foundTrashType'] ?? 'No Item Detected';
 
-    // Registrar el evento en Firebase Analytics con el tiempo y el resultado
-    await logScanToFirestore((duration / 1000).ceil(), trashType);
-
-    // If trash type is detected, show notification and add points
+    // Validar si el ítem es detectado
     if (trashType != 'No Item Detected') {
-      result['pointsMessage'] = '+50 points!'; // Add points message to result
-      await _addPointsToFirestore(50); // Add points to Firestore
+      print("Adding points: Item detected");
+      await _addPointsToFirestore(50, trashType); // Añadir 50 puntos siempre que haya un ítem detectado
+      result['pointsMessage'] = '+50 points!';
+    } else {
+      print("No points added: No Item Detected");
+      result['pointsMessage'] = ''; // No se muestra mensaje si no se detecta ítem
     }
 
     await deleteImageFile();
-    return result; // Return the result
+    return result;
   }
 
-  Future<void> _addPointsToFirestore(int points) async {
-    final userDoc = FirebaseFirestore.instance.collection('users').doc('user-email');
-    final docSnapshot = await userDoc.get();
-    if (docSnapshot.exists) {
-      final currentPoints = docSnapshot.get('points.total');
-      await userDoc.update({'points.total': currentPoints + points});
+
+  Future<void> _addPointsToFirestore(int newPoints, String trashType) async {
+    if(_hasPointsBeenAdded)
+    {
+        return;
     }
+
+    if (trashType == 'No Item Detected') {
+      // No sumar puntos si no se detecta un ítem válido
+      print("No points added: No Item Detected");
+      return;
+    }
+
+    try {
+      final userDoc =
+          FirebaseFirestore.instance.collection('users').doc(widget.userEmail);
+
+      final docSnapshot = await userDoc.get();
+
+      final todayDate = DateTime.now().toIso8601String().split('T')[0]; // Solo la fecha en formato "YYYY-MM-DD"
+      _hasPointsBeenAdded = true;
+
+      if (docSnapshot.exists) {
+        // Si el documento ya existe
+        final data = docSnapshot.data() as Map<String, dynamic>;
+        final points = data['points'] ?? {};
+        final history = List<Map<String, dynamic>>.from(points['history'] ?? []);
+        final totalPoints = points['total'] ?? 0;
+
+        // Añadir el registro del día
+        history.add({
+          'date': todayDate,
+          'points': newPoints,
+        });
+
+        // Actualizar Firestore con el nuevo historial y total
+        await userDoc.update({
+          'points.history': history,
+          'points.total': totalPoints + newPoints,
+        });
+
+        print("50 points successfully added for today's scan.");
+        
+      } else {
+        // Si el documento no existe, crea uno nuevo con el historial del escaneo
+        await userDoc.set({
+          'user_id': widget.userEmail,
+          'points': {
+            'history': [
+              {
+                'date': todayDate,
+                'points': newPoints,
+              },
+            ],
+            'total': newPoints,
+          },
+        });
+
+        print("50 points successfully added.");
+      }
+    } catch (e) {
+      print("Error updating Firestore: $e");
+    }
+
   }
 
   @override
@@ -194,7 +254,6 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
             right: 20,
             child: Container(
               padding: const EdgeInsets.all(10),
-              width: MediaQuery.of(context).size.width * 0.8,
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(10),
@@ -254,44 +313,42 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
                             ),
                             const SizedBox(width: 16),
                             Expanded(
-                              child: Center(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      data['foundTrashType'] ?? 'No result',
-                                      style: GoogleFonts.montserrat(
-                                        color: Colors.black,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      textAlign: TextAlign.left,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    data['foundTrashType'] ?? 'No result',
+                                    style: GoogleFonts.montserrat(
+                                      color: Colors.black,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                    Text(
-                                      data['appropriateBin'],
-                                      style: GoogleFonts.montserrat(
-                                        color: Colors.black54,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      textAlign: TextAlign.left,
+                                    textAlign: TextAlign.left,
+                                  ),
+                                  Text(
+                                    data['appropriateBin'],
+                                    style: GoogleFonts.montserrat(
+                                      color: Colors.black54,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                    if (data.containsKey('pointsMessage'))
-                                      Padding(
-                                        padding: const EdgeInsets.only(top: 8.0),
-                                        child: Text(
-                                          data['pointsMessage'],
-                                          style: GoogleFonts.montserrat(
-                                            color: SustainUColors.limeGreen,
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                          textAlign: TextAlign.left,
+                                    textAlign: TextAlign.left,
+                                  ),
+                                  if (data.containsKey('pointsMessage') &&
+                                      data['pointsMessage']!.isNotEmpty)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 8.0),
+                                      child: Text(
+                                        data['pointsMessage'],
+                                        style: GoogleFonts.montserrat(
+                                          color: SustainUColors.limeGreen,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
                                         ),
+                                        textAlign: TextAlign.left,
                                       ),
-                                  ],
-                                ),
+                                    ),
+                                ],
                               ),
                             ),
                           ],
@@ -309,3 +366,4 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
     );
   }
 }
+

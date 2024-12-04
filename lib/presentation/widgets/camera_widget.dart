@@ -63,74 +63,74 @@ class CameraWidgetState extends State<CameraWidget> {
     });
   }
 
-  /// Método para agregar puntos al Firestore
-  Future<void> _addPointsToFirestore(int newPoints) async {
-    if (userEmail == null) {
-      print("El correo del usuario no está disponible.");
-      return;
-    }
+  // /// Método para agregar puntos al Firestore
+  // Future<void> _addPointsToFirestore(int newPoints) async {
+  //   if (userEmail == null) {
+  //     print("El correo del usuario no está disponible.");
+  //     return;
+  //   }
 
-    try {
-      // Referencia al documento del usuario en Firestore
-      final userDoc = FirebaseFirestore.instance.collection('users').doc(userEmail);
+  //   try {
+  //     // Referencia al documento del usuario en Firestore
+  //     final userDoc = FirebaseFirestore.instance.collection('users').doc(userEmail);
 
-      // Obtiene el documento del usuario
-      final docSnapshot = await userDoc.get();
+  //     // Obtiene el documento del usuario
+  //     final docSnapshot = await userDoc.get();
 
-      if (docSnapshot.exists) {
-        // Si el documento ya existe, actualiza los puntos
-        final data = docSnapshot.data() as Map<String, dynamic>;
-        final points = data['points'] ?? {};
-        final history = List<Map<String, dynamic>>.from(points['history'] ?? []);
-        final totalPoints = points['total'] ?? 0;
+  //     if (docSnapshot.exists) {
+  //       // Si el documento ya existe, actualiza los puntos
+  //       final data = docSnapshot.data() as Map<String, dynamic>;
+  //       final points = data['points'] ?? {};
+  //       final history = List<Map<String, dynamic>>.from(points['history'] ?? []);
+  //       final totalPoints = points['total'] ?? 0;
 
-        // Agrega la nueva entrada al historial
-        history.add({
-          'date': DateTime.now().toIso8601String().split('T')[0], // Solo la fecha
-          'points': newPoints,
-        });
+  //       // Agrega la nueva entrada al historial
+  //       history.add({
+  //         'date': DateTime.now().toIso8601String().split('T')[0], // Solo la fecha
+  //         'points': newPoints,
+  //       });
 
-        // Actualiza los puntos y el historial en Firestore
-        await userDoc.update({
-          'points.history': history,
-          'points.total': totalPoints + newPoints,
-        });
-      } else {
-        // Si el documento no existe, crea uno nuevo
-        await userDoc.set({
-          'user_id': userEmail,
-          'points': {
-            'history': [
-              {
-                'date': DateTime.now().toIso8601String().split('T')[0],
-                'points': newPoints,
-              },
-            ],
-            'total': newPoints,
-          },
-        });
-      }
+  //       // Actualiza los puntos y el historial en Firestore
+  //       await userDoc.update({
+  //         'points.history': history,
+  //         'points.total': totalPoints + newPoints,
+  //       });
+  //     } else {
+  //       // Si el documento no existe, crea uno nuevo
+  //       await userDoc.set({
+  //         'user_id': userEmail,
+  //         'points': {
+  //           'history': [
+  //             {
+  //               'date': DateTime.now().toIso8601String().split('T')[0],
+  //               'points': newPoints,
+  //             },
+  //           ],
+  //           'total': newPoints,
+  //         },
+  //       });
+  //     }
 
-      // // Show notification when points are added
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   SnackBar(
-      //     content: Text(
-      //       "Congratulations, You earned $newPoints points!",
-      //       style: GoogleFonts.montserrat(
-      //         fontSize: 16,
-      //         color: Colors.white,
-      //       ),
-      //     ),
-      //     backgroundColor: SustainUColors.limeGreen,
-      //     duration: Duration(seconds: 3),
-      //   ),
-      // );
+  //     // // Show notification when points are added
+  //     // ScaffoldMessenger.of(context).showSnackBar(
+  //     //   SnackBar(
+  //     //     content: Text(
+  //     //       "Congratulations, You earned $newPoints points!",
+  //     //       style: GoogleFonts.montserrat(
+  //     //         fontSize: 16,
+  //     //         color: Colors.white,
+  //     //       ),
+  //     //     ),
+  //     //     backgroundColor: SustainUColors.limeGreen,
+  //     //     duration: Duration(seconds: 3),
+  //     //   ),
+  //     // );
 
-      print("Puntos añadidos correctamente.");
-    } catch (e) {
-      print("Error al actualizar Firestore: $e");
-    }
-  }
+  //     print("Puntos añadidos correctamente.");
+  //   } catch (e) {
+  //     print("Error al actualizar Firestore: $e");
+  //   }
+  // }
 
   // /// Simulate detecting an item
   // Future<String> _detectItem() async {
@@ -328,14 +328,36 @@ class CameraWidgetState extends State<CameraWidget> {
                           await _initializeControllerFuture;
                           final image = await _controller.takePicture();
 
+                          // Verifica si el email del usuario está disponible
+                          if (userEmail == null) {
+                            print("El correo del usuario no está disponible.");
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'User email not available. Please try again.',
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 16,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                backgroundColor: Colors.red,
+                                duration: Duration(seconds: 3),
+                              ),
+                            );
+                            return;
+                          }
+
                           // Lógica para guardar puntos en Firestore
-                          await _addPointsToFirestore(50); // Añade 50 puntos por foto
+                          //await _addPointsToFirestore(50); // Añade 50 puntos por foto
 
                           if (!context.mounted) return;
+
                           await Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (context) =>
-                                  DisplayPictureScreen(imagePath: image.path),
+                              builder: (context) => DisplayPictureScreen(
+                                imagePath: image.path,
+                                userEmail: userEmail!, 
+                              ),
                             ),
                           );
                         }
