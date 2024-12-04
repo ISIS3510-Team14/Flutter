@@ -84,10 +84,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   });
                 },
                 calendarStyle: CalendarStyle(
-                  todayDecoration: BoxDecoration(
-                    color: SustainUColors.limeGreen,
-                    shape: BoxShape.circle,
-                  ),
                   selectedDecoration: BoxDecoration(
                     color: Colors.blue,
                     shape: BoxShape.circle,
@@ -134,7 +130,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     if (_hasEntry(day)) {
                       return Container(
                         decoration: BoxDecoration(
-                          color: SustainUColors.lightBlue,
+                          color: SustainUColors.limeGreen,
                           shape: BoxShape.circle,
                         ),
                         alignment: Alignment.center,
