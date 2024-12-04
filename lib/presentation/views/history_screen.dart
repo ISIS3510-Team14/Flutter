@@ -131,17 +131,21 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     return null;
                   },
                   todayBuilder: (context, day, focusedDay) {
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: SustainUColors.limeGreen,
-                        shape: BoxShape.circle,
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        '${day.day}',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    );
+                    if (_hasEntry(day)) {
+                      return Container(
+                        decoration: BoxDecoration(
+                          color: SustainUColors.lightBlue,
+                          shape: BoxShape.circle,
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          '${day.day}',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      );
+                    }
+
+                    return null;
                   },
                   selectedBuilder: (context, day, focusedDay) {
                     return Container(
