@@ -19,14 +19,10 @@ class User {
   static int _calculateStreakDays(List<Map<String, dynamic>> history) {
     if (history.isEmpty) return 0;
 
-    // Usando Set para almacenar fechas únicas
-    Set<String> distinctDates = {};
-    
-    // Bucle indexado en lugar de map
-    for (int i = 0; i < history.length; i++) {
-      distinctDates.add(history[i]['date'].toString());
-    }
+    // Extract and normalize the distinct dates
+    Set distinctDates = history.map((entry) => entry['date']).toSet();
 
+    // Count the number of unique dates
     return distinctDates.length;
   }
 

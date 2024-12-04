@@ -7,6 +7,7 @@ import '../../data/services/openai/openai_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sustain_u/presentation/widgets/bottom_navbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../core/utils/sustainu_colors.dart';
 
 Future<void> logScanToFirestore(int durationSeconds, String trashType) async {
   try {
@@ -33,7 +34,6 @@ String convertFileToBase64(File imageFile) {
     return base64Encode(imageBytes);
   } catch (e) {
     print("Error converting file to base64: $e");
-    // You might want to return an empty string or throw an exception
     return '';
   }
 }
@@ -79,14 +79,12 @@ Future<Map<String, dynamic>> getAnswer(String imagePath, Timer timer) async {
               imageBase64);
           appropriateBin = openaiAnswer!;
         }
-        break; // Exit loop after the first match
+        break;
       }
     }
   } catch (e) {
-    // Modify the error message
     timer.cancel();
     String errorMessage = "Lost connection to the internet. Make sure you have an internet connection and try again";
-    // Rethrow the exception with the new message
     throw Exception(errorMessage);
   }
 
@@ -163,8 +161,24 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
 
     // Registrar el evento en Firebase Analytics con el tiempo y el resultado
     await logScanToFirestore((duration / 1000).ceil(), trashType);
+
+    // If trash type is detected, show notification and add points
+    if (trashType != 'No Item Detected') {
+      result['pointsMessage'] = '+50 points!'; // Add points message to result
+      await _addPointsToFirestore(50); // Add points to Firestore
+    }
+
     await deleteImageFile();
     return result; // Return the result
+  }
+
+  Future<void> _addPointsToFirestore(int points) async {
+    final userDoc = FirebaseFirestore.instance.collection('users').doc('user-email');
+    final docSnapshot = await userDoc.get();
+    if (docSnapshot.exists) {
+      final currentPoints = docSnapshot.get('points.total');
+      await userDoc.update({'points.total': currentPoints + points});
+    }
   }
 
   @override
@@ -230,7 +244,7 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
                           ),
                           textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: 1),
+                        const SizedBox(height: 10),
                         Row(
                           children: [
                             Icon(
@@ -241,28 +255,44 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
                             const SizedBox(width: 16),
                             Expanded(
                               child: Center(
-                                  child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    data['foundTrashType'] ?? 'No result',
-                                    style: GoogleFonts.montserrat(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      data['foundTrashType'] ?? 'No result',
+                                      style: GoogleFonts.montserrat(
                                         color: Colors.black,
                                         fontSize: 16,
-                                        fontWeight: FontWeight.bold),
-                                    textAlign: TextAlign.left,
-                                  ),
-                                  Text(
-                                    data['appropriateBin'],
-                                    style: GoogleFonts.montserrat(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      textAlign: TextAlign.left,
+                                    ),
+                                    Text(
+                                      data['appropriateBin'],
+                                      style: GoogleFonts.montserrat(
                                         color: Colors.black54,
                                         fontSize: 16,
-                                        fontWeight: FontWeight.bold),
-                                    textAlign: TextAlign.left,
-                                  ),
-                                ],
-                              )),
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      textAlign: TextAlign.left,
+                                    ),
+                                    if (data.containsKey('pointsMessage'))
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 8.0),
+                                        child: Text(
+                                          data['pointsMessage'],
+                                          style: GoogleFonts.montserrat(
+                                            color: SustainUColors.limeGreen,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                          textAlign: TextAlign.left,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
                             ),
                           ],
                         ),
